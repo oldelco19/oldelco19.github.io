@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>가열기 시뮬레이터</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Gmarket+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+  #itemList {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    gap: 10px;
+    padding: 20px;
+    min-height: 100px;
+  }
+  .item-box {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    color: white;
+  }
+  .item-N { background-color: gray; }
+  .item-R { background-color: blue; }
+  .item-SR { background-color: purple; }
+  .item-SSR { background-color: orange; }
+  .item-UR { background-color: gold; color: black; }
+  .item-LR { background-color: red; }
+  .item-ZR { background-color: black; color: white; }
+  html, body {
+    font-family: 'Gmarket Sans', 'Noto Sans KR', sans-serif;
+    background: #f7f8fa;
+    color: #222;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .item-legendary { color: #eab308; }
+  .item-legend { color: #f87171; }
+  .item-rare { color: #38bdf8; }
+  .item-common { color: #64748b; }
+  .item-box {
+    border-radius: 0.5rem;
+    border-width: 2px;
+    border-style: solid;
+    background: #fff;
+    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+  }
+  .item-legendary-box { border-color: #eab308; }
+  .item-legend-box { border-color: #f87171; }
+  .item-rare-box { border-color: #38bdf8; }
+  .item-common-box { border-color: #64748b; }
+  .transition-width {
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+    </style>
+  </head>
+  <body class="p-4">
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-bold">획득한 아이템</h2>
+      </div>
+      <div id="itemList" class="flex flex-wrap gap-2 min-h-[56px] max-h-28 overflow-y-auto scrollbar-hide"></div>
+    </div>
+
+    <div class="flex flex-col items-center mb-6">
+      <div class="flex items-center gap-2 mb-2">
+        <span id="drawCount" class="text-base font-semibold text-gray-700">0개 뽑음</span>
+      </div>
+      <div class="flex gap-2">
+        <input id="drawInput" type="number" min="1" max="1000000" value="1" class="w-16 px-2 py-1 border rounded-lg text-center text-base focus:outline-none focus:ring-2 focus:ring-blue-200" />
+        <button id="drawBtn" class="px-6 py-2 bg-blue-500 text-white font-bold rounded-lg shadow hover:bg-blue-600 transition text-base">열기</button>
+      </div>
+    </div>
+
+    <div class="mb-2">
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-sm font-medium text-gray-700">가열기 포인트</span>
+            <span id="gaugePercent" class="text-lg font-extrabold text-gray-900">0.00%</span>
+          </div>
+          <div class="w-full h-5 bg-gray-200 rounded-lg overflow-hidden mb-1">
+            <div id="gaugeBar" class="h-full bg-gradient-to-r from-blue-400 to-blue-600 transition-width" style="width:0%"></div>
+          </div>
+          <!-- 아래에 위치 -->
+          <div class="text-right text-xs text-gray-500 mb-4">
+            <span id="fullCountText">정가 횟수 0번</span>
+          </div>
+    </div>
+
+    </div>
+    <button id="showAllBtn" class="absolute top-2 right-2 text-xs bg-white border rounded px-2 py-1">
+        전체 목록
+    </button>
+
+    <div id="modal" style="display: none; position: fixed; top: 10%; left: 30%; background: white; border: 1px solid #ccc; padding: 20px; z-index: 1000;">
+        <h2>전체 뽑기 목록</h2>
+        <div id="fullItemList"></div>
+        <button id="resetBtn">초기화</button>
+        <button id="closeModalBtn">닫기</button>
+    </div>
+
+    <div id="historyModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 relative">
+        <button id="closeHistoryBtn" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+        <h3 class="text-lg font-bold mb-4">획득한 아이템 전체 목록</h3>
+        <div id="historyList" class="max-h-72 overflow-y-auto scrollbar-hide flex flex-col gap-2"></div>
+        <button id="resetBtn" class="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm hidden">초기화</button>
+      </div>
+    </div>
+
+    <script type="module">
+      const ITEM_POOL = [
+        { name: "전설 아이템1", type: "legendary1", prob: 0.009, point: 0.1 },
+        { name: "전설 아이템2", type: "legendary2", prob: 0.027, point: 0.1 },
+        { name: "전설 아이템3", type: "legendary3", prob: 0.033, point: 0.1 },
+        { name: "전설 아이템4", type: "legendary4", prob: 0.007, point: 0.1 },
+        { name: "전설 아이템5", type: "legendary5", prob: 0.004, point: 0.1 },
+        { name: "전설 아이템6", type: "legendary6", prob: 0.0002, point: 0.1 },
+        { name: "전설 아이템7", type: "legendary7", prob: 0.00005, point: 0.1 },
+        { name: "전설 아이템8", type: "legendary8", prob: 0.006, point: 0.1 },
+        { name: "전설 아이템9", type: "legendary9", prob: 0.000003, point: 0.1 },
+        { name: "레전드 아이템1", type: "legend1", prob: 0.010597, point: 0.15 },
+        { name: "레전드 아이템2", type: "legend2", prob: 0.065, point: 0.15 },
+        { name: "레전드 아이템3", type: "legend3", prob: 0.00115, point: 0.15 },
+        { name: "레전드 아이템4", type: "legend4", prob: 0.068, point: 0.15 },
+        { name: "레어 아이템1", type: "rare1", prob: 0.04, point: 0.2 },
+        { name: "레어 아이템2", type: "rare2", prob: 0.013, point: 0.2 },
+        { name: "레어 아이템3", type: "rare3", prob: 0.08, point: 0.2 },
+        { name: "레어 아이템4", type: "rare4", prob: 0.04, point: 0.2 },
+        { name: "레어 아이템5", type: "rare5", prob: 0.1, point: 0.2 },
+        { name: "일반 아이템1", type: "common1", prob: 0.216, point: 0.4 },
+        { name: "일반 아이템2", type: "common2", prob: 0.28, point: 0.4 },
+      ];
+      const ITEM_VARIANTS = {
+        legendary1: ["크레스트 드레인 무기 큐브","크레스트 드레인 액세서리 (얼굴 중) 큐브"],
+        legendary2: ["크레스트 드레인 상의 큐브","크레스트 드레인 하의 큐브","크레스트 드레인 헤어 큐브"],
+        legendary3: ["크레스트 드레인 장갑 큐브","크레스트 드레인 신발 큐브"],
+        legendary4: ["크레스트 드레인 액세서리 (팔) 큐브","크레스트 드레인 액세서리 (목걸이) 큐브"],
+        legendary5: ["크레스트 드레인 액세서리 (하의) 큐브"],
+        legendary6: ["찬란한 비전의 원석","드랍률 70% 메달 큐브 (1일)"],
+        legendary7: ["무기 전용 강화의 부적 Lv.10","방어구 전용 강화의 부적 Lv.10","버서커","새크리파이스","글로리 오브 빅토리"],
+        legendary8: ["현자의 크리티컬 마법석","현자의 극대화 마법석","현자의 동작속도 마법석","현자의 추가 데미지 마법석","현자의 데미지 감소 마법석","현자의 HP 증가 마법석"],
+        legendary9: ["골드 샤이닝 머플러 큐브","디바인 아뮬렛 큐브","아케인 글리프"],
+        legend1: ["현자의 마법석 2개 큐브"],
+        legend2: ["환상적인 하이퍼 액티브 가속화 영약", "환상적인 벤투스의 날개깃 영약"],
+        legend3: ["엘 수색대 컬렉션 - 시너지 효과 이용권 (10일)"],
+        legend4: ["프로모션 아바타 큐브 (15일)", "오리하르콘 무기 장식 큐브"],
+        rare1: ["크리티컬 특급 마법석", "동작속도 특급 마법석", "극대화 특급 마법석", "HP 특급 마법석"],
+        rare2: ["투지의 물약"],
+        rare3: ["거인의 돌사과", "초인의 유기농 사과", "질풍의 안드로메다 사과", "적응의 영약"],
+        rare4: ["완전 회복 포션 150개 큐브"],
+        rare5: ["완전 회복 포션 100개 큐브"],
+        common1: ["불의 수정구 300개 큐브", "자연의 수정구 300개 큐브", "물의 수정구 300개 큐브", "바람의 수정구 300개 큐브","빛의 수정구 300개 큐브","어둠의 수정구 300개 큐브"],
+        common2: ["엘의 조각 (불명)","엘의 조각 (레드)","엘의 조각 (블루)","엘의 조각 (윈드)","엘의 조각 (그린)","엘의 조각 (다크)","엘의 조각 (라이트)"]
+      };
+
+      let items = [];
+      let drawCount = 0;
+      let gauge = 0;
+      let itemMap = {};
+      let fullCount = 0;
+
+      const itemList = document.getElementById('itemList');
+      const drawBtn = document.getElementById('drawBtn');
+      const drawInput = document.getElementById('drawInput');
+      const drawCountSpan = document.getElementById('drawCount');
+      const gaugeBar = document.getElementById('gaugeBar');
+      const gaugePercent = document.getElementById('gaugePercent');
+      const fullCountText = document.getElementById('fullCountText');
+      const historyBtn = document.getElementById('historyBtn');
+      const historyModal = document.getElementById('historyModal');
+      const historyList = document.getElementById('historyList');
+      const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const showAllBtn = document.getElementById('showAllBtn');
+        const modal = document.getElementById('modal');
+        const fullItemList = document.getElementById('fullItemList');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        // 전체 목록 보기 버튼 이벤트
+    showAllBtn.addEventListener('click', () => {
+    fullItemList.innerHTML = ''; // 초기화
+
+    const entries = Object.entries(itemMap);
+    if (entries.length === 0) {
+        fullItemList.innerHTML = '<p>아직 아무것도 뽑지 않았습니다.</p>';
+    } else {
+        entries.forEach(([name, data]) => {
+        const el = document.createElement('div');
+        el.textContent = `${name} x ${data.count}`;
+        fullItemList.appendChild(el);
+        });
+    }
+
+    modal.style.display = 'block';
+    });
+
+    // 닫기 버튼
+    closeModalBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+    });
+
+    // 초기화 버튼
+    resetBtn.addEventListener('click', () => {
+    items.length = 0;
+    for (let key in itemMap) delete itemMap[key];
+
+
+        
+    
+    function updateGaugeDisplay() {
+    if (gauge >= 100) {
+        fullCount += Math.floor(gauge / 100); // 100 넘는 만큼 추가
+        fullCount += reached;
+        gauge = gauge % 100; // 100 이상이면 나머지만 유지
+    }
+
+    gaugeBar.style.width = `${Math.min(gauge, 100).toFixed(2)}%`;
+    gaugePercent.textContent = `${Math.min(gauge, 100).toFixed(2)}%`;
+    fullCountText.textContent = `정가 횟수 ${fullCount}번`;
+    }
+
+
+    fullItemList.innerHTML = '<p>모든 항목이 초기화되었습니다.</p>';
+    });
+
+    function getRandomItem() {
+        const r = Math.random();
+        let sum = 0;
+        for (const item of ITEM_POOL) {
+            sum += item.prob;
+            if (r < sum) {
+            const variants = ITEM_VARIANTS[item.type];
+            if (!variants || variants.length === 0) {
+                console.warn(`❗ Variants for "${item.type}" not found or empty`);
+                return { name: item.name, type: item.type, point: item.point };
+            }
+            const name = variants[Math.floor(Math.random() * variants.length)];
+            if (!name) {
+                console.warn(`❗ Empty item name found in type "${item.type}"`);
+            }
+            return { name, type: item.type, point: item.point };
+            }
+        }
+        // fallback
+        const fallback = ITEM_POOL[ITEM_POOL.length - 1];
+        const fallbackName = ITEM_VARIANTS[fallback.type]?.[0] || "알 수 없음";
+        return {
+            name: fallbackName,
+            type: fallback.type,
+            point: fallback.point
+        };
+        }
+
+
+      function updateGaugeDisplay() {
+        gaugeBar.style.width = `${gauge.toFixed(2)}%`;
+        gaugePercent.textContent = `${gauge.toFixed(2)}%`;
+        fullCountText.textContent = `정가 횟수 ${fullCount}번`;
+        }
+
+        drawBtn.addEventListener('click', () => {
+            const count = Math.min(Math.max(parseInt(drawInput.value) || 1, 1), 1000000);
+            itemList.innerHTML = '';
+            let lastItem = null;
+
+            for (let i = 0; i < count; i++) {
+                const item = getRandomItem();
+                items.push(item);
+                gauge += item.point;
+
+                if (itemMap[item.name]) {
+                itemMap[item.name].count++;
+                } else {
+                itemMap[item.name] = { count: 1, type: item.type };
+                }
+
+                // 🔥 정가 도달 체크 및 처리
+                if (gauge >= 100) {
+                const reached = Math.floor(gauge / 100);
+                fullCount += reached;
+                gauge = gauge % 100;
+                console.log(`${reached}회 정가 도달!`);
+                }
+
+                lastItem = item;
+            }
+
+            if (lastItem) {
+                const el = document.createElement('div');
+                el.className = `px-2 py-1 text-sm font-bold item-${lastItem.type} item-box item-${lastItem.type}-box`;
+                el.textContent = lastItem.name;
+                itemList.appendChild(el);
+            }
+
+            drawCount += count;
+            drawCountSpan.textContent = `${drawCount}개 뽑음`;
+            updateGaugeDisplay();
+            });
+
+
+
+      historyBtn.addEventListener('click', () => {
+        historyList.innerHTML = '';
+        for (const name in itemMap) {
+          const { count, type } = itemMap[name];
+          const el = document.createElement('div');
+          el.className = `px-2 py-1 text-sm font-bold item-${type} item-box item-${type}-box`;
+          el.textContent = `${name} x ${count}`;
+          historyList.appendChild(el);
+        }
+        historyModal.classList.remove('hidden');
+        resetBtn.classList.remove('hidden');
+      });
+
+      closeHistoryBtn.addEventListener('click', () => {
+        historyModal.classList.add('hidden');
+      });
+
+      resetBtn.addEventListener('click', () => {
+        itemMap = {};
+        items = [];
+        itemList.innerHTML = '';
+        historyList.innerHTML = '';
+        historyModal.classList.add('hidden');
+        resetBtn.classList.add('hidden');
+      });
+    </script>
+  </body>
+</html>
