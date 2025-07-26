@@ -134,7 +134,7 @@
       </div>
     </div>
 
-    <script type="module">
+    <script type="module"> // 확률 이거 맞음?
       const ITEM_POOL = [
         { name: "전설 아이템1", type: "legendary1", prob: 0.009, point: 0.1 },
         { name: "전설 아이템2", type: "legendary2", prob: 0.027, point: 0.1 },
@@ -308,7 +308,6 @@
                 itemMap[item.name] = { count: 1, type: item.type };
                 }
 
-                // 🔥 정가 도달 체크 및 처리
                 if (gauge >= 100) {
                 const reached = Math.floor(gauge / 100);
                 fullCount += reached;
