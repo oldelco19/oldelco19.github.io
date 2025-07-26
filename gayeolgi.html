@@ -212,9 +212,10 @@
         fullItemList.innerHTML = '<p>아직 아무것도 뽑지 않았습니다.</p>';
     } else {
         entries.forEach(([name, data]) => {
-        const el = document.createElement('div');
-        el.textContent = `${name} x ${data.count}`;
-        fullItemList.appendChild(el);
+          const el = document.createElement('div');
+          el.className = `px-2 py-1 text-sm font-bold item-${data.type} item-box item-${data.type}-box`;
+          el.textContent = `${name} x ${data.count}`;
+          fullItemList.appendChild(el);
         });
     }
 
