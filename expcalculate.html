@@ -175,19 +175,20 @@
         <input type="number" id="expPerGame" min="1" />
 
         
-        <label for="selectoption">세부 옵션</label>
-        <select id="selectoption" name="Selectoption" onchange="handleOnChange(this)">
-          <option value="unuse">사용안함</option>
-          <option value="use">사용</option>
-        </select>
-          <div id="select_option"></div>
-              
-        <button onclick="calculate()">계산하기</button>
-
-        <div id="targetDiv" style="display: none;"></div>
 
 
         <div class="right-panel">
+          <label for="selectoption">세부 옵션</label>
+          <select id="selectoption" name="Selectoption" onchange="handleOnChange(this)">
+            <option value="unuse">사용안함</option>
+            <option value="use">사용</option>
+          </select>
+            <div id="select_option"></div>
+                
+          <button onclick="calculate()">계산하기</button>
+  
+          <div id="targetDiv" style="display: none;"></div>
+          
           <div id="targetDiv" style="display: none;">
               <label for="solooption">1인 여부</label>
               <select id="solooptionn" name="solotopion" onchange="handleOnChange(this)">
