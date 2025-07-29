@@ -171,7 +171,22 @@
         </select>
           <div id="select_option"></div>
 
-        <div id="targetDiv">이 DIV는 선택에 따라 보이거나 숨겨집니다.</div>
+        <div id="targetDiv">
+          <div class="container">
+            <label for="solooption">1인 여부</label>
+            <select id="solooptionn" select name="solotopion" onchange="handleOnChange(this)">
+              <option value="solo">1인</option>
+              <option value="notsolo">1인초과</option>
+            </select>
+              <div id="solooption"></div>
+        
+            <label for="missionoption">랜덤 미션 설정</label>
+            <select id="missionoptionn" select name="missionoption" onchange="handleOnChange(this)">
+              <option value="missionoff">사용안함</option>
+              <option value="missionon">사용</option>
+            </select>
+              <div id="missionoption"></div>
+        </div>
 
         <button onclick="calculate()">계산하기</button>
 
