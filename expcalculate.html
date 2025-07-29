@@ -127,6 +127,15 @@
     opacity: 1;
     }
 
+
+    #targetDiv {
+      display: none; 
+      margin-top: 1rem;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+    }
+
   
 </style>
   </style>
@@ -194,6 +203,13 @@
     document.addEventListener('DOMContentLoaded', function () {
       const selectElement = document.getElementById('selectoption');
       const targetDiv = document.getElementById('targetDiv');
+
+
+      if (selectElement.value === 'use') {
+        targetDiv.style.display = 'block';
+      } else {
+        targetDiv.style.display = 'none';
+      }
   
       selectElement.addEventListener('change', function () {
         if (this.value === 'use') {
