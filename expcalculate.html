@@ -226,6 +226,25 @@
 
 
   <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const selectElement = document.getElementById('selectoption');
+      const target_Div = document.getElementById('target_Div');
+
+
+      if (selectElement.value === 'use') {
+        target_Div.style.display = 'block';
+      } else {
+        target_Div.style.display = 'none';
+      }
+  
+      selectElement.addEventListener('change', function () {
+        if (this.value === 'use') {
+          target_Div.style.display = 'block';
+        } else {
+          target_Div.style.display = 'none';
+        }
+      });
+    });
     
     // 경험치 테이블
     const a = [0,161600,331199,511999,707199,919998,1153598,1411198,1695997,2011197,2359997,2749452,3183635,3666655,4202806,4796410,5451992,
@@ -328,42 +347,33 @@
         resultDiv.innerHTML = "유효하지 않은 입력입니다.";
         return;
     }
-
-    const startExp = a[startLevel - 1];
-    const endExp = a[endLevel - 1];
-    const percentExp = (percentage / 100) * (endExp - startExp);
-    const currentTotalExp = startExp + percentExp;
-    let expNeeded = endExp - currentTotalExp;
-
-  // ✅ 상세 옵션 적용
-    const isDetailed = document.getElementById("enableDetailedOptions").checked;
-    let bonusPercent = 0;
-    let buffMultiplier = 1.0;
-
-    if (isDetailed) {
-        bonusPercent = parseFloat(document.getElementById("bonusPercent").value) || 0;
-        buffMultiplier = parseFloat(document.getElementById("buffMultiplier").value) || 1.0;
-    }
-
-  // 1판당 경험치 계산
-    const actualExpPerGame = expPerGameMillion * 1000000 * (1 + bonusPercent / 100) * buffMultiplier;
-    const playCountRaw = expNeeded / actualExpPerGame;
-
-    let playCount = (playCountRaw % 1 >= 0.5 || playCountRaw <= 0) 
-                    ? Math.ceil(playCountRaw) 
-                    : Math.floor(playCountRaw);
-    playCount = Math.max(playCount, 1);
-
-    const expPerGameEok = (expPerGameMillion / 100).toFixed(1);
-
-    resultDiv.style.display = "block";
-    resultDiv.innerHTML = `
-        <strong>${startLevel}레벨의 ${percentage}%</strong>에서 
-        <strong>${endLevel}레벨</strong>까지 필요한 경험치: 
-        <strong>${expNeeded.toLocaleString(undefined, {maximumFractionDigits: 1})}</strong><br />
-        1판에 <strong>${expPerGameEok}억</strong> 경험치를 얻는다면 
-        <strong>${playCount}</strong>판을 플레이해야 합니다.
-    `;
+    else {
+      const startExp = a[startLevel - 1];
+      const endExp = a[endLevel - 1];
+      const percentExp = (percentage / 100) * (endExp - startExp);
+      const currentTotalExp = startExp + percentExp;
+      let expNeeded = endExp - currentTotalExp;
+  
+  
+    // 1판당 경험치 계산
+      const actualExpPerGame = expPerGameMillion * 1000000 * (1 + bonusPercent / 100) * buffMultiplier;
+      const playCountRaw = expNeeded / actualExpPerGame;
+  
+      let playCount = (playCountRaw % 1 >= 0.5 || playCountRaw <= 0) 
+                      ? Math.ceil(playCountRaw) 
+                      : Math.floor(playCountRaw);
+      playCount = Math.max(playCount, 1);
+  
+      const expPerGameEok = (expPerGameMillion / 100).toFixed(1);
+  
+      resultDiv.style.display = "block";
+      resultDiv.innerHTML = `
+          <strong>${startLevel}레벨의 ${percentage}%</strong>에서 
+          <strong>${endLevel}레벨</strong>까지 필요한 경험치: 
+          <strong>${expNeeded.toLocaleString(undefined, {maximumFractionDigits: 1})}</strong><br />
+          1판에 <strong>${expPerGameEok}억</strong> 경험치를 얻는다면 
+          <strong>${playCount}</strong>판을 플레이해야 합니다.
+      `;
     }
 
   </script>
