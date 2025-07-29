@@ -127,8 +127,9 @@
     opacity: 1;
     }
 
-
+  
 </style>
+  <div id="targetDiv" style="display: none;">...</div>
   </style>
 </head>
 <body>
@@ -191,19 +192,19 @@
 
 
   <script>
-    const selectElement = document.getElementById('selectoption');
-    const targetDiv = document.getElementById('targetDiv');
-
-    selectElement.addEventListener('change', function () {
-      const selectedValue = this.value;
-
-      if (selectedValue === 'show') {
-        targetDiv.style.display = 'block';
-      } else {
-        targetDiv.style.display = 'none';
-      }
+    document.addEventListener('DOMContentLoaded', function () {
+      const selectElement = document.getElementById('selectoption');
+      const targetDiv = document.getElementById('targetDiv');
+  
+      selectElement.addEventListener('change', function () {
+        if (this.value === 'show') {
+          targetDiv.style.display = 'block';
+        } else {
+          targetDiv.style.display = 'none';
+        }
+      });
     });
-    }
+    
     // 경험치 테이블
     const a = [0,161600,331199,511999,707199,919998,1153598,1411198,1695997,2011197,2359997,2749452,3183635,3666655,4202806,4796410,5451992,
                 6174203,6967703,7837386,8788282,9825405,10954041,12179618,13507520,14943444,16493240,18162676,19957883,21885150,23950648,26182783, 
