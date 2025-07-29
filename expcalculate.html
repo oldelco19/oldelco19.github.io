@@ -188,7 +188,7 @@
           </select>
             <div id="selectoption"></div>
             
-          <div id="targetDiv">
+          <div id="target_Div">
               <label for="solooption">1인 여부</label>
               <select id="solooptionn" name="solotopion" onchange="handleOnChange(this)">
                 <option value="solo">1인</option>
@@ -228,20 +228,20 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const selectElement = document.getElementById('selectoption');
-      const targetDiv = document.getElementById('targetDiv');
+      const target_Div = document.getElementById('target_Div');
 
 
       if (selectElement.value === 'use') {
-        targetDiv.style.display = 'block';
+        target_Div.style.display = 'block';
       } else {
-        targetDiv.style.display = 'none';
+        target_Div.style.display = 'none';
       }
   
       selectElement.addEventListener('change', function () {
         if (this.value === 'use') {
-          targetDiv.style.display = 'block';
+          target_Div.style.display = 'block';
         } else {
-          targetDiv.style.display = 'none';
+          target_Div.style.display = 'none';
         }
       });
     });
