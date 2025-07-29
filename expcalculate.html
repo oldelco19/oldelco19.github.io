@@ -147,7 +147,8 @@
               <input type="number" id="percentage" min="0" max="100" value="0" />
         
               <label for="endLevel">목표 레벨</label>
-              <input type="number" id="endLevel" min="1" />>
+              <input type="number" id="endLevel" min="1" />
+
 
         <label for="expPerGame">
             1판당 경험치 (백만 단위)
@@ -160,6 +161,14 @@
         <button onclick="calculate()">계산하기</button>
 
         <div class="result" id="result" style="display: none;"></div>
+
+
+
+        <select name="Select option" onchange="handleOnChange(this)">
+          <option value="unuse">사용안함</option>
+          <option value="use">사용</option>
+          </select>
+          <div id="select_option"></div>
   </div>
 
     
