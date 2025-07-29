@@ -165,7 +165,7 @@
 
         
         <label for="selectoption">세부 옵션</label>
-        <select id="selectoption" select name="Selectoption" onchange="handleOnChange(this)">
+        <select id="selectoption" name="Selectoption" onchange="handleOnChange(this)">
           <option value="unuse">사용안함</option>
           <option value="use">사용</option>
         </select>
@@ -173,28 +173,26 @@
               
         <button onclick="calculate()">계산하기</button>
 
-        <div class="result" id="result" style="display: none;"></div>
-
         <div id="targetDiv" style="display: none;">...</div>
 
         <div id="targetDiv">
           <div class="container">
             <label for="solooption">1인 여부</label>
-            <select id="solooptionn" select name="solotopion" onchange="handleOnChange(this)">
+            <select id="solooptionn" name="solotopion" onchange="handleOnChange(this)">
               <option value="solo">1인</option>
               <option value="notsolo">1인초과</option>
             </select>
               <div id="solooption"></div>
         
             <label for="missionoption">랜덤 미션 설정</label>
-            <select id="missionoptionn" select name="missionoption" onchange="handleOnChange(this)">
+            <select id="missionoptionn" name="missionoption" onchange="handleOnChange(this)">
               <option value="missionoff">사용안함</option>
               <option value="missionon">사용</option>
             </select>
               <div id="missionoption"></div>
 
               <label for="cleartime">평균 클리어 시간 (초)</label>
-              <input type="number" id="startLevel" min="1800" />
+              <input type="number" id="cleartime" min="1800" />
         </div>
 
 
