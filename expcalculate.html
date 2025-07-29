@@ -160,7 +160,7 @@
 
         
         <label for="selectoption">세부 옵션</label>
-        <select name="Selectoption" onchange="handleOnChange(this)">
+        <select id="selectoption" select name="Selectoption" onchange="handleOnChange(this)">
           <option value="unuse">사용안함</option>
           <option value="use">사용</option>
           </select>
@@ -190,11 +190,18 @@
 
 
   <script>
-    function toggleDetailedOptions() {
-        const selectValue = document.getElementById("detailedOptionSelect").value;
-        const detailBox = document.getElementById("detailedOptions");
+    const selectElement = document.getElementById('selectoption');
+    const targetDiv = document.getElementById('targetDiv');
 
-        detailBox.style.display = selectValue === "on" ? "block" : "none";
+    selectElement.addEventListener('change', function () {
+      const selectedValue = this.value;
+
+      if (selectedValue === 'show') {
+        targetDiv.style.display = 'block';
+      } else {
+        targetDiv.style.display = 'none';
+      }
+    });
     }
     // 경험치 테이블
     const a = [0,161600,331199,511999,707199,919998,1153598,1411198,1695997,2011197,2359997,2749452,3183635,3666655,4202806,4796410,5451992,
