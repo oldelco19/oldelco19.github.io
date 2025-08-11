@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="kr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Item Fusion Prototype</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700;400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Noto Sans KR', 'sans-serif';
+      background: #f5f7fa;
+    }
+    .item-slot {
+      transition: box-shadow 0.2s;
+    }
+    .item-slot.selected,
+    .item-slot:hover {
+      box-shadow: 0 0 0 3px #4299e1;
+      border-color: #4299e1;
+    }
+    .item-img {
+      border-radius: 0.375rem;
+      border: 2px solid #e2e8f0;
+      background: #fff;
+      object-fit: cover;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    #modal-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    #modal {
+      background: white;
+      border-radius: 1rem;
+      max-width: 320px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      font-weight: 700;
+      color: #1e293b; /* gray-800 */
+    }
+
+    #modal button {
+      margin-top: 1.5rem;
+      background: #3b82f6; /* sky-500 */
+      color: white;
+      font-weight: 700;
+      padding: 0.5rem 1.5rem;
+      border-radius: 0.5rem;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    #modal button:hover {
+      background-color: #2563eb; /* sky-600 */
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-xl bg-white rounded-2xl shadow-2xl p-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-2">
+      <div class="text-lg font-bold text-sky-600 tracking-tight">아이템 합성</div>
+      <div class="flex space-x-1">
+        <span class="material-icons text-sky-400 cursor-pointer hover:text-sky-600">help_outline</span>
+        <span class="material-icons text-sky-400 cursor-pointer hover:text-sky-600">close</span>
+      </div>
+    </div>
+
+    <!-- Fusion Area -->
+    <div class="bg-gray-100 rounded-xl p-6 mb-4 shadow-inner relative">
+      <div class="flex flex-col items-center">
+        <div class="mb-2">
+          <span class="material-icons text-gray-400 text-4xl">help</span>
+        </div>
+        <div class="flex items-center space-x-4 mb-2">
+          <div
+            class="item-slot w-16 h-16 bg-gray-800 flex items-center justify-center rounded-lg border-2 border-gray-700 cursor-pointer"
+            data-slot="0"
+          >
+            <span class="material-icons text-gray-400 text-3xl">add</span>
+          </div>
+          <div
+            class="item-slot w-16 h-16 bg-gray-800 flex items-center justify-center rounded-lg border-2 border-gray-700 cursor-pointer"
+            data-slot="1"
+          >
+            <span class="material-icons text-gray-400 text-3xl">add</span>
+          </div>
+          <div
+            class="item-slot w-16 h-16 bg-gray-800 flex items-center justify-center rounded-lg border-2 border-gray-700 cursor-pointer"
+            data-slot="2"
+          >
+            <span class="material-icons text-gray-400 text-3xl">add</span>
+          </div>
+        </div>
+        <div class="flex items-center mb-4">
+          <span class="text-gray-500 text-sm mr-1">등급 상승 확률</span>
+          <span id="success-rate" class="text-sky-500 font-bold text-sm">- %</span>
+          <span class="material-icons text-sky-400 text-base ml-1 cursor-pointer" title="확률 정보">help_outline</span>
+        </div>
+        <div class="flex space-x-4 w-full">
+          <input
+            type="number"
+            id="try-count"
+            value="1"
+            min="1"
+            class="w-20 border rounded-lg text-center font-bold"
+          />
+          <button
+            id="fuse-btn"
+            class="flex-1 bg-gradient-to-r from-sky-400 to-teal-400 text-white font-bold py-2 rounded-lg shadow disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            disabled
+          >
+            합성하기
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory -->
+    <div class="bg-gray-50 rounded-xl p-4 shadow-inner">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center">
+          <span class="text-base font-bold text-sky-600 mr-2">보유 아이템</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory Grid -->
+    <div class="grid grid-cols-6 gap-2 max-h-32 overflow-y-auto scrollbar-hide">
+      <div
+        class="item-img border-2 border-red-500 bg-red-100 flex flex-col items-center justify-center p-1 cursor-pointer hover:scale-105 transition-transform"
+        data-item='{"id":1,"rarity":"normal","name":"일반 마법석","count":1}'
+      >
+        <span class="text-base font-bold text-gray-900">일반<br>마법석</span>
+        <span class="text-xs font-bold text-red-600">x1</span>
+      </div>
+      <div
+        class="item-img border-2 border-blue-500 bg-blue-100 flex flex-col items-center justify-center p-1 cursor-pointer hover:scale-105 transition-transform"
+        data-item='{"id":2,"rarity":"rare","name":"레어 마법석","count":1}'
+      >
+        <span class="text-base font-bold text-gray-900">레어<br>마법석</span>
+        <span class="text-xs font-bold text-blue-600">x1</span>
+      </div>
+      <div
+        class="item-img border-2 border-purple-500 bg-purple-100 flex flex-col items-center justify-center p-1 cursor-pointer hover:scale-105 transition-transform"
+        data-item='{"id":3,"rarity":"elite","name":"엘리트 마법석","count":1}'
+      >
+        <span class="text-base font-bold text-gray-900">엘리트<br>마법석</span>
+        <span class="text-xs font-bold text-purple-600">x1</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal-bg">
+    <div id="modal">
+      <div id="modal-content" style="white-space: pre-line; font-size: 1.1rem;"></div>
+      <button id="modal-close">닫기</button>
+    </div>
+  </div>
+
+  <script type="module">
+    let fusionSlots = [null, null, null];
+    const slotEls = document.querySelectorAll('.item-slot');
+    const inventoryEls = document.querySelectorAll('.item-img[data-item]');
+    const fuseBtn = document.getElementById('fuse-btn');
+    const successRateEl = document.getElementById('success-rate');
+    const modalBg = document.getElementById('modal-bg');
+    const modalContent = document.getElementById('modal-content');
+    const modalCloseBtn = document.getElementById('modal-close');
+    const tryCountInput = document.getElementById('try-count');
+
+    const rarityRates = {
+      normal: 60,
+      rare: 30,
+      elite: 10,
+    };
+
+    inventoryEls.forEach((el) => {
+      el.addEventListener('click', () => {
+        const item = JSON.parse(el.getAttribute('data-item'));
+        fusionSlots = [item, item, item];
+        updateSlots();
+        updateRate(item.rarity);
+      });
+    });
+
+    slotEls.forEach((el, idx) => {
+      el.addEventListener('click', () => {
+        fusionSlots[idx] = null;
+        updateSlots();
+        successRateEl.textContent = '- %';
+      });
+    });
+
+    function updateSlots() {
+      slotEls.forEach((el, idx) => {
+        el.innerHTML = '';
+        if (fusionSlots[idx]) {
+          el.classList.add('selected');
+          el.innerHTML = `<span class="text-white font-bold text-sm">${fusionSlots[idx].name}</span>`;
+        } else {
+          el.classList.remove('selected');
+          el.innerHTML = `<span class="material-icons text-gray-400 text-3xl">add</span>`;
+        }
+      });
+      fuseBtn.disabled = fusionSlots.includes(null);
+    }
+
+
+    function updateRate(rarity) {
+      const rate = rarityRates[rarity] || 0;
+      successRateEl.textContent = `${rate} %`;
+    }
+
+
+    function showModal(message) {
+      modalContent.textContent = message;
+      modalBg.style.display = 'flex';
+    }
+
+
+    modalCloseBtn.addEventListener('click', () => {
+      modalBg.style.display = 'none';
+    });
+
+
+    modalBg.addEventListener('click', (e) => {
+      if (e.target === modalBg) {
+        modalBg.style.display = 'none';
+      }
+    });
+
+    // 합성 버튼 클릭시 입력 횟수만큼 시도 후 결과 모달 표시
+    fuseBtn.addEventListener('click', () => {
+      if (fusionSlots.includes(null)) return;
+      const rarity = fusionSlots[0].rarity;
+      const rate = rarityRates[rarity] || 0;
+      const tries = parseInt(tryCountInput.value) || 1;
+
+      let successCount = 0;
+      let failCount = 0;
+
+      for (let i = 0; i < tries; i++) {
+        if (Math.random() * 100 < rate) successCount++;
+        else failCount++;
+      }
+
+      showModal(`합성결과\n\n성공 x${successCount} 실패 x${failCount}`);
+    });
+  </script>
+</body>
+</html>
