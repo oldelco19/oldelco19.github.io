@@ -2,7 +2,7 @@
 <html lang="kr">
 <head>
   <meta charset="UTF-8" />
-  <title>Item Fusion Prototype</title>
+  <title>아트마 마법석 합성 시뮬레이터</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700;400&display=swap" rel="stylesheet" />
@@ -34,6 +34,7 @@
       scrollbar-width: none;
     }
 
+
     #modal-bg {
       position: fixed;
       top: 0;
@@ -46,6 +47,7 @@
       justify-content: center;
       z-index: 9999;
     }
+
 
     #modal {
       background: white;
@@ -77,6 +79,7 @@
 </head>
 <body class="min-h-screen flex items-center justify-center">
   <div class="w-full max-w-xl bg-white rounded-2xl shadow-2xl p-6">
+
     <div class="flex items-center justify-between mb-2">
       <div class="text-lg font-bold text-sky-600 tracking-tight">아이템 합성</div>
       <div class="flex space-x-1">
@@ -84,6 +87,7 @@
         <span class="material-icons text-sky-400 cursor-pointer hover:text-sky-600">close</span>
       </div>
     </div>
+
 
     <div class="bg-gray-100 rounded-xl p-6 mb-4 shadow-inner relative">
       <div class="flex flex-col items-center">
@@ -134,6 +138,7 @@
       </div>
     </div>
 
+
     <div class="bg-gray-50 rounded-xl p-4 shadow-inner">
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center">
@@ -141,6 +146,7 @@
         </div>
       </div>
     </div>
+
 
     <div class="grid grid-cols-6 gap-2 max-h-32 overflow-y-auto scrollbar-hide">
       <div
@@ -167,7 +173,7 @@
     </div>
   </div>
 
-  <!-- Modal -->
+
   <div id="modal-bg">
     <div id="modal">
       <div id="modal-content" style="white-space: pre-line; font-size: 1.1rem;"></div>
@@ -186,11 +192,18 @@
     const modalCloseBtn = document.getElementById('modal-close');
     const tryCountInput = document.getElementById('try-count');
 
+    const rarityED = {
+      normal: 200000,
+      rare: 1000000,
+      elite: 5000000
+    }
+
     const rarityRates = {
       normal: 60,
       rare: 30,
       elite: 10,
     };
+
 
     inventoryEls.forEach((el) => {
       el.addEventListener('click', () => {
@@ -208,6 +221,7 @@
         successRateEl.textContent = '- %';
       });
     });
+
 
     function updateSlots() {
       slotEls.forEach((el, idx) => {
@@ -229,7 +243,6 @@
       successRateEl.textContent = `${rate} %`;
     }
 
-
     function showModal(message) {
       modalContent.textContent = message;
       modalBg.style.display = 'flex';
@@ -247,7 +260,13 @@
       }
     });
 
-    // 합성 버튼 클릭시 입력 횟수만큼 시도 후 결과 모달 표시
+    function formatToEok(num) {
+      const eok = 100000000;
+      const value = num / eok;
+      return value.toFixed(2) + '억';
+    }
+
+
     fuseBtn.addEventListener('click', () => {
       if (fusionSlots.includes(null)) return;
       const rarity = fusionSlots[0].rarity;
@@ -261,8 +280,10 @@
         if (Math.random() * 100 < rate) successCount++;
         else failCount++;
       }
+      
+      const triesED = (rarityED[rarity] ||0) * tries;
 
-      showModal(`합성결과\n\n성공 x${successCount} 실패 x${failCount}`);
+      showModal(`합성결과\n\n성공 x${successCount} 실패 x${failCount}\n\n 소모한 ED ${formatToEok(triesED)}`);
     });
   </script>
 </body>
