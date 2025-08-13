@@ -109,7 +109,12 @@
     <div class="flex items-center justify-between mb-2">
       <div class="text-lg font-bold text-sky-600 tracking-tight">아이템 합성</div>
       <div class="flex space-x-1">
-        <span class="material-icons text-sky-400 cursor-pointer hover:text-sky-600">help_outline</span>
+        <span 
+          class="material-icons text-sky-400 cursor-pointer hover:text-sky-600" 
+          id="help-icon1"
+        >
+          help_outline
+        </span>
         <span class="material-icons text-sky-400 cursor-pointer hover:text-sky-600">close</span>
       </div>
     </div>
@@ -149,7 +154,12 @@
           <div class="flex items-center mb-4">
             <span class="text-gray-500 text-sm mr-1">등급 상승 확률</span>
             <span id="success-rate" class="text-sky-500 font-bold text-sm">- %</span>
-            <span class="material-icons text-sky-400 text-base ml-1 cursor-pointer" title="확률 정보">help_outline</span>
+            <span 
+              class="material-icons text-sky-400 cursor-pointer hover:text-sky-600" 
+              id="help-icon2"
+            >
+              help_outline
+            </span>
           </div>
           <div class="flex space-x-4 w-full">
             <input
@@ -243,7 +253,12 @@
         <div class="flex items-center mb-4">
           <span class="text-gray-500 text-sm mr-1">등급 상승 확률</span>
           <span id="success-rate-accessory" class="text-sky-500 font-bold text-sm">- %</span>
-          <span class="material-icons text-sky-400 text-base ml-1 cursor-pointer" title="확률 정보">help_outline</span>
+          <span 
+            class="material-icons text-sky-400 cursor-pointer hover:text-sky-600" 
+            id="help-icon3"
+          >
+            help_outline
+          </span>
         </div>
         <div class="flex space-x-4 w-full">
           <input
@@ -301,18 +316,6 @@
       <span class="text-base font-bold text-gray-900">유니크<br>기운</span>
       <span class="text-xs font-bold text-yellow-600">x1</span>
       </div>
-      <div
-        class="item-img border-2 border-yellow-500 bg-yellow-100 flex flex-col items-center justify-center p-1 cursor-pointer hover:scale-105 transition-transform"
-        data-item='{"id":105,"rarity":"Unike3"}'
-      >
-        <span class="text-base font-bold text-gray-900">유니크<br>만들기</span>
-      </div>
-      <div
-      class="item-img border-2 border-red-500 bg-red-100 flex flex-col items-center justify-center p-1 cursor-pointer hover:scale-105 transition-transform"
-      data-item='{"id":106,"rarity":"legend"}'
-    >
-      <span class="text-base font-bold text-gray-900">레전드<br>만들기</span>
-    </div>
     </div>
   </div>
 
@@ -327,17 +330,36 @@
 
   <script type="module">
 
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
 
-      const target = btn.dataset.tab;
-      document.querySelectorAll('.tab-content').forEach(tc => {
-        tc.style.display = tc.id === target ? 'block' : 'none';
+
+
+
+    const helpIcon = document.getElementById('help-icon1');
+    helpIcon.addEventListener('click', () => {
+      showModal(`마법석을 누르면 마법석 합성\n 액세서리를 누르면 액세서리 합성`);
+    });
+
+    const helpIcon2 = document.getElementById('help-icon2');
+    helpIcon2.addEventListener('click', () => {
+      showModal(`성공 확률 \n\n 일반 마법석 60%\n 레어 마법석 30%\n 엘리트 마법석 10%\n\n 유니크 만들기 선택시\n 유니크1개를 만듬`);
+    });
+
+    const helpIcon3 = document.getElementById('help-icon3');
+    helpIcon3.addEventListener('click', () => {
+      showModal(`성공 확률 \n\n 일반 기운 50%\n 레어 기운 20%\n 엘리트 기운 10%\n 유니크 기운 5%`);
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const target = btn.dataset.tab;
+        document.querySelectorAll('.tab-content').forEach(tc => {
+          tc.style.display = tc.id === target ? 'block' : 'none';
+        });
       });
     });
-  });
 
   
 
@@ -510,7 +532,7 @@
       
       const triesED = (rarityED[rarity] ||0) * tries;
 
-      showModal(`합성결과\n\n성공 x${successCount} 실패 x${failCount}\n\n 소모한 ED ${formatToEok(triesED)}`);
+      showModal(`합성결과\n\n성공 x${successCount} 실패 x${failCount}\n\n 사용한 ED ${formatToEok(triesED)}`);
     });
 
     
@@ -533,7 +555,7 @@
 
       const AccessorytriesED = (rarityEDAccessory[rarityAccessory] || 0) * triesAccessory;
 
-      showModal(`합성결과\n\n성공 x${AccessorysuccessCount} 실패 x${AccessoryfailCount}\n\n 소모한 ED ${formatToEok(AccessorytriesED)}`);
+      showModal(`합성결과\n\n성공 x${AccessorysuccessCount} 실패 x${AccessoryfailCount}\n\n 사용한 ED ${formatToEok(AccessorytriesED)}`);
     });
 
 
@@ -546,97 +568,6 @@
       document.body.addEventListener('click', (e) => {
         const item = e.target.closest('[data-item]');
         if (!item) return;
-
-        if (item.dataset.item.includes('"rarity":"Unike3"') && item.dataset.item.includes('"id":105')) {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          let actotalUsed = { normal: 0, rare: 0, elite: 0 };
-
-          let acsuccess = false;
-          while (!acsuccess) {
-            let acused = { normal: 0, rare: 0, elite: 0 };
-            let accurrent = 'normal';
-            
-            while (accurrent !== 'Unike2') {
-              acused[accurrent] += 3;
-              const roll = Math.random() * 100;
-              if (accurrent === 'normal' && roll < AccessoryRates.normal) {
-                accurrent = 'rare';
-              } else if (accurrent === 'rare' && roll < AccessoryRates.rare) {
-                accurrent = 'elite';
-              } else if (accurrent === 'elite' && roll < AccessoryRates.elite) {
-                accurrent = 'Unike2';
-              } else {
-                accurrent = 'normal';
-              }
-            }
-            actotalUsed.normal += acused.normal;
-            actotalUsed.rare += acused.rare;
-            actotalUsed.elite += acused.elite;
-            acsuccess = true;
-          }
-          
-          
-          const actriesnormalED = actotalUsed.normal / 3 * 200000;
-          const actriesrareED = actotalUsed.rare / 3 * 1000000;
-          const actrieseliteED = actotalUsed.elite / 3 * 5000000;
-          const actriesuniqueED = actotalUsed.Unike3 / 3 * 10000000;
-          const actriesallED = actriesnormalED + actriesrareED + actrieseliteED
-
-          showModal(
-            `사용한 기운\n\n` + `일반 기운 x ${actotalUsed.normal}\n` + `레어 기운 x ${actotalUsed.rare}\n` +  `엘리트 기운 x ${actotalUsed.elite}\n\n `+ `사용한 ED ${formatToEok(actriesallED)}`
-          );
-        }
-
-        
-        if (item.dataset.item.includes('"rarity":"legend"') && item.dataset.item.includes('"id":106')) {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          let actotalUsed = { normal: 0, rare: 0, elite: 0, Unike2: 0};
-
-          let acsuccess = false;
-          while (!acsuccess) {
-            let acused = { normal: 0, rare: 0, elite: 0, Unike2: 0};
-            let accurrent = 'normal';
-            
-            while (accurrent !== 'legend') {
-              acused[accurrent] += 3;
-              const roll = Math.random() * 100;
-              if (accurrent === 'normal' && roll < AccessoryRates.normal) {
-                accurrent = 'rare';
-              } else if (accurrent === 'rare' && roll < AccessoryRates.rare) {
-                accurrent = 'elite';
-              } else if (accurrent === 'elite' && roll < AccessoryRates.elite) {
-                accurrent = 'Unike2';
-              } else if (accurrent === 'Unike2' && roll < AccessoryRates.Unike2) {
-                accurrent = 'legend';
-              } else {
-                accurrent = 'normal';
-              }
-            }
-            actotalUsed.normal += acused.normal;
-            actotalUsed.rare += acused.rare;
-            actotalUsed.elite += acused.elite;
-            actotalUsed.Unike2 += acused.Unike2
-            acsuccess = true; 
-          }
-          
-          
-          const actriesnormalED = actotalUsed.normal / 3 * 200000;
-          const actriesrareED = actotalUsed.rare / 3 * 1000000;
-          const actrieseliteED = actotalUsed.elite / 3 * 5000000;
-          const actriesUnike2ED = actotalUsed.Unike2 / 3 * 100000000;
-          const actriesallED = actriesnormalED + actriesrareED + actrieseliteED + actriesUnike2ED
-
-          showModal(
-            `사용한 기운\n\n` + `일반 기운 x ${actotalUsed.normal}\n` + `레어 기운 x ${actotalUsed.rare}\n` +  `엘리트 기운 x ${actotalUsed.elite}\n `+ `유니크 기운 x ${actotalUsed.Unike2}\n\n` + `사용한 ED ${formatToEok(actriesallED)}`
-          );
-        }
-        
-
-
         
 
         if (item.dataset.item.includes('"rarity":"Unike"') && item.dataset.item.includes('"id":4')) {
@@ -679,7 +610,7 @@
           const triesallED = triesnormalED + triesrareED + trieseliteED
 
           showModal(
-            `사용한 마법석\n\n` + `일반 마법석 x ${totalUsed.normal}\n` + `레어 마법석 x ${totalUsed.rare}\n` +  `엘리트 마법석 x ${totalUsed.elite}\n `+ `사용한 ED ${formatToEok(triesallED)}`
+            `사용한 마법석\n\n` + `일반 마법석 x ${totalUsed.normal}\n` + `레어 마법석 x ${totalUsed.rare}\n` +  `엘리트 마법석 x ${totalUsed.elite}\n\n `+ `사용한 ED ${formatToEok(triesallED)}`
           );
       
 
