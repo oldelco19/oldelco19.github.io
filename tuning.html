@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>칩 튜닝 시스템</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbit&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Orbit', 'sans-serif'],
+            },
+            colors: {
+              chipblue: '#1da7e7',
+              chipred: '#ff4d4f',
+              chipgray: '#f4f6fa',
+              chipborder: '#e5e7eb',
+              chipgold: '#fbbf24',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Orbit', 'sans-serif';
+        background: #f7f8fa;
+      }
+      .chip-shadow {
+        box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08), 0 1.5px 0 0 #e5e7eb;
+      }
+      .chip-circuit {
+        background: linear-gradient(120deg, #1da7e7 0%, #7f53ac 100%);
+        position: relative;
+        overflow: hidden;
+      }
+      .chip-circuit::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: black;
+        opacity: 0.18;
+        background-size: cover;
+        background-position: center;
+        z-index: 0;
+      }
+      .chip-circuit-content {
+        position: relative;
+        z-index: 1;
+      }
+      .chip-btn:active {
+        filter: brightness(0.95);
+      }
+      .chip-coin {
+        background: linear-gradient(90deg, #fbbf24 60%, #f59e42 100%);
+        color: #fff;
+        font-weight: 700;
+        border-radius: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .chip-coin svg {
+        width: 1.2em;
+        height: 1.2em;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex flex-col items-center justify-center px-2 py-8">
+    <div class="w-full max-w-xl bg-white rounded-xl chip-shadow border border-chipborder p-0">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-4 pt-3 pb-1 border-b border-chipborder">
+        <div class="flex items-center gap-2">
+          <span class="text-chipblue font-bold text-lg">칩튜닝</span>
+        </div>
+        
+        <button class="text-chipblue hover:text-chipred transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <title>닫기</title>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div id="money-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-80 text-center">
+          <h2 class="text-lg font-bold mb-4">누적 금액</h2>
+          <p id="modal-amount" class="text-2xl font-extrabold text-chipgold mb-4">0원</p>
+          <button id="close-modal" class="mt-2 px-4 py-2 bg-chipblue text-white rounded-lg hover:bg-blue-500 transition-colors">
+            닫기
+          </button>
+        </div>
+      </div>
+      
+      <!-- Chip Info -->
+      <div class="chip-circuit rounded-b-lg px-6 py-6 flex flex-col items-center">
+        <div class="chip-circuit-content flex flex-col items-center">
+          <div class="text-white text-center text-lg font-semibold mb-2">+0 T.E.S 시스템 칩</div>
+          <div class="flex items-center justify-center mb-3">
+            <div class="w-24 h-24 bg-white rounded-lg flex items-center justify-center border-4 border-chipblue shadow-lg">
+                <span class="text-3xl font-extrabold text-chipblack transition-all duration-200">칩</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between w-full max-w-xs mx-auto mb-2">
+            <div class="flex flex-col items-center">
+              <span id="success-count" class="text-3xl font-extrabold text-chipblue transition-all duration-200">0</span>
+              <span class="text-xs text-white mt-1">성공</span>
+            </div>
+            <div class="flex flex-col items-center">
+              <span id="fail-count" class="text-3xl font-extrabold text-chipred transition-all duration-200">0</span>
+              <span class="text-xs text-white mt-1">실패</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Tuning Panel -->
+      <div class="bg-chipgray px-6 py-5 rounded-b-xl border-t border-chipborder">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+          <div class="text-base font-bold flex items-center gap-2">
+            남은 튜닝 횟수: 
+            <span id="tuning-tries" class="text-chipblue underline cursor-pointer">10회</span>
+          </div>
+          <div class="chip-coin">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" fill="#fbbf24" stroke="#f59e42" stroke-width="2"/>
+              <text x="12" y="16" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">₩</text>
+            </svg>
+            <span id="money">1,000,000</span>
+          </div>
+          <div class="flex items-center gap-3 mt-3">
+            <div id="total-earned" class="mt-2 text-sm text-gray-600 text-center"></div>
+                <button id="check-btn" class="flex-1 text-white font-bold text-lg py-2 rounded-lg bg-chipgold hover:bg-yellow-500 transition-colors shadow active:scale-95">
+                누적 ED
+                </button>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="flex-1">
+                <div class="text-center text-sm font-semibold text-chipblue bg-white rounded-lg py-2 border border-chipblue">
+                성공 확률: <span id="success-rate">50%</span>
+                </div>
+            </div>
+            <button id="tune-btn" class="chip-btn flex-1 text-white font-bold text-lg py-2 rounded-lg bg-chipblue hover:bg-blue-500 transition-colors shadow active:scale-95 focus:outline-none focus:ring-2 focus:ring-chipblue focus:ring-offset-2">
+                튜닝
+            </button>
+            </div>
+            <div class="flex items-center gap-3 mt-3">
+                <button id="reset-btn" class="flex-1 text-white font-bold text-lg py-2 rounded-lg bg-chipred hover:bg-red-500 transition-colors shadow active:scale-95">
+                초기화
+                </button>
+            </div>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      // State
+        let tries = 10;
+        let successCount = 0;
+        let failCount = 0;
+        let successRate = 50;
+        let money = 1000000;
+        let totalED = 0;
+        const MONEY_INCREMENT = 1000000;
+
+        const triesEl = document.getElementById('tuning-tries');
+        const successCountEl = document.getElementById('success-count');
+        const failCountEl = document.getElementById('fail-count');
+        const successRateEl = document.getElementById('success-rate');
+        const tuneBtn = document.getElementById('tune-btn');
+        const moneyEl = document.getElementById('money');
+        const resetBtn = document.getElementById('reset-btn');
+        const checkBtn = document.getElementById('check-btn');
+        const totalEDEl = document.getElementById('total-earned');
+        const modal = document.getElementById('money-modal');
+        const modalAmount = document.getElementById('modal-amount');
+        const closeModal = document.getElementById('close-modal');
+
+        checkBtn.addEventListener('click', () => {
+            modalAmount.textContent = totalED.toLocaleString();
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            updateUI();
+        });
+
+        closeModal.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        });
+
+            
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        });
+
+        function updateUI() {
+            triesEl.textContent = tries + '회';
+            successCountEl.textContent = successCount;
+            failCountEl.textContent = failCount;
+            successRateEl.textContent = successRate + '%';
+            if (moneyEl) moneyEl.textContent = money.toLocaleString();
+
+            // Animate color flash
+            successCountEl.classList.remove('animate-pulse');
+            failCountEl.classList.remove('animate-pulse');
+        }
+
+        function animateCount(el, color) {
+            el.classList.add('animate-pulse');
+            el.style.color = color;
+            setTimeout(() => {
+            el.classList.remove('animate-pulse');
+            el.style.color = '';
+            }, 500);
+        }
+
+        tuneBtn.addEventListener('click', () => {
+            if (tries <= 0) {
+            return;
+            }
+            // Simulate tuning
+            const roll = Math.random() * 100;
+            if (roll < successRate) {
+            // Success
+            successCount++;
+            animateCount(successCountEl, '#1da7e7');
+            successRate = Math.max(30, successRate - 10);
+            totalED += money
+            money += MONEY_INCREMENT;
+            } else {
+            // Fail
+            failCount++;
+            animateCount(failCountEl, '#ff4d4f');
+            successRate = Math.min(70, successRate + 10);
+            totalED += money
+            }
+            tries--;
+            updateUI();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            tries = 10;
+            successCount = 0;
+            failCount = 0;
+            successRate = 50;
+            money = 1000000;
+            updateUI();
+        });
+
+        checkBtn.addEventListener('click', () => {
+            updateUI();
+        });
+
+
+
+
+        updateUI();
+    </script>
+  </body>
+</html>
