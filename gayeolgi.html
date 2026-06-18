@@ -22,7 +22,7 @@
   .item-box {
     padding: 10px 16px;
     border-radius: 8px;
-    font-weight: bold;
+    font-weight: normal;
     font-size: 1rem;
     color: black;
   }
@@ -40,15 +40,17 @@
   }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-  .item-legendary1 { color: #eab308; }
-  .item-legendary2 { color: #eab308; }
-  .item-legendary3 { color: #eab308; }
-  .item-legendary4 { color: #eab308; }
-  .item-legendary5 { color: #eab308; }
-  .item-legendary6 { color: #eab308; }
-  .item-legendary7 { color: #ea0897; }
-  .item-legendary8 { color: #eab308; }
-  .item-legendary9 { color: #b208ea; }
+  .item-legendary1 { color: black; }
+  .item-legendary2 { color: black; }
+  .item-legendary3 { color: black; }
+  .item-legendary4 { color: black; }
+  .item-legendary5 { color: black; }
+  .item-legendary6 { color: black; }
+  .item-legendary7 { color: black; }
+  .item-A_legendary1 { color: #eab308; }
+  .item-A_legendary2 { color: #ea0897; }
+  .item-A_legendary3 { color: #eab308; }
+  .item-A_legendary4 { color: #b208ea; }
   .item-legend1 { color: #f87171; }
   .item-legend2 { color: #f87171; }
   .item-legend3 { color: #f87171; }
@@ -89,7 +91,7 @@
         <span id="drawCount" class="text-base font-semibold text-gray-700">0개 뽑음</span>
       </div>
       <div class="flex gap-2">
-        <input id="drawInput" type="number" min="1" max="1000000" value="1" class="w-16 px-2 py-1 border rounded-lg text-center text-base focus:outline-none focus:ring-2 focus:ring-blue-200" />
+        <input id="drawInput" type="number" min="1" max="10000" value="1" class="w-16 px-2 py-1 border rounded-lg text-center text-base focus:outline-none focus:ring-2 focus:ring-blue-200" />
         <button id="drawBtn" class="px-6 py-2 bg-blue-500 text-white font-bold rounded-lg shadow hover:bg-blue-600 transition text-base">열기</button>
       </div>
     </div>
@@ -102,13 +104,11 @@
           <div class="w-full h-5 bg-gray-200 rounded-lg overflow-hidden mb-1">
             <div id="gaugeBar" class="h-full bg-gradient-to-r from-blue-400 to-blue-600 transition-width" style="width:0%"></div>
           </div>
-          <!-- 아래에 위치 -->
           <div class="text-right text-xs text-gray-500 mb-4">
             <span id="fullCountText">정가 횟수 0번</span>
           </div>
     </div>
 
-    </div>
     <button id="showAllBtn" class="absolute top-2 right-2 text-xs bg-white border rounded px-2 py-1">
         전체 목록
     </button>
@@ -117,34 +117,25 @@
         <h2>전체 뽑기 목록</h2>
         <button id="resetBtn">초기화</button>
         <button id="closeModalBtn">닫기</button>
-        <div style="height: 300px; overflow-y: auto"> 
+        <div style="height: 300px; overflow-y: auto; margin-top: 10px;"> 
           <div id="fullItemList"></div>
+        </div>
     </div>
 
-    <div id="historyModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
-      <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 relative">
-        <button id="closeHistoryBtn" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-        <h3 class="text-lg font-bold mb-4">획득한 아이템 전체 목록</h3>
-        <div id="historyList" class="max-h-72 overflow-y-auto scrollbar-hide flex flex-col gap-2"></div>
-        <button id="resetBtn" class="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm hidden">초기화</button>
-      </div>
-    </div>
-
-    <script type="module"> // 확률 이거 맞음?
+    <script type="module">
+      // 확률
       const ITEM_POOL = [
-        { name: "전설 아이템1", type: "legendary1", prob: 0.009, point: 0.1 },
-        { name: "전설 아이템2", type: "legendary2", prob: 0.027, point: 0.1 },
+        { name: "전설 아이템1", type: "legendary1", prob: 0.0135, point: 0.1 },
+        { name: "전설 아이템2", type: "legendary2", prob: 0.018, point: 0.1 },
         { name: "전설 아이템3", type: "legendary3", prob: 0.033, point: 0.1 },
-        { name: "전설 아이템4", type: "legendary4", prob: 0.007, point: 0.1 },
-        { name: "전설 아이템5", type: "legendary5", prob: 0.004, point: 0.1 },
-        { name: "전설 아이템6", type: "legendary6", prob: 0.0002, point: 0.1 },
-        { name: "전설 아이템7", type: "legendary7", prob: 0.00005, point: 0.1 },
-        { name: "전설 아이템8", type: "legendary8", prob: 0.006, point: 0.1 },
-        { name: "전설 아이템9", type: "legendary9", prob: 0.000003, point: 0.1 },
+        { name: "전설 아이템4", type: "legendary4", prob: 0.005, point: 0.1 },
+        { name: "전설 아이템5", type: "legendary5", prob: 0.0055, point: 0.1 },
+        { name: "전설 아이템6", type: "legendary6", prob: 0.004, point: 0.1 },
+        { name: "전설 아이템7", type: "legendary7", prob: 0.001, point: 0.1 },
+        { name: "그외 전설 아이템1", type: "A_legendary1", prob: 0.0002, point: 0.1 },
+        { name: "그외 전설 아이템2", type: "A_legendary2", prob: 0.00005, point: 0.1 },
+        { name: "그외 전설 아이템3", type: "A_legendary3", prob: 0.006, point: 0.1 },
+        { name: "그외 전설 아이템4", type: "A_legendary4", prob: 0.000003, point: 0.1 },
         { name: "레전드 아이템1", type: "legend1", prob: 0.010597, point: 0.15 },
         { name: "레전드 아이템2", type: "legend2", prob: 0.065, point: 0.15 },
         { name: "레전드 아이템3", type: "legend3", prob: 0.00115, point: 0.15 },
@@ -158,15 +149,18 @@
         { name: "일반 아이템2", type: "common2", prob: 0.28, point: 0.4 },
       ];
       const ITEM_VARIANTS = {
-        legendary1: ["크레스트 드레인 무기 큐브","크레스트 드레인 액세서리 (얼굴 중) 큐브"],
-        legendary2: ["크레스트 드레인 상의 큐브","크레스트 드레인 하의 큐브","크레스트 드레인 헤어 큐브"],
-        legendary3: ["크레스트 드레인 장갑 큐브","크레스트 드레인 신발 큐브"],
-        legendary4: ["크레스트 드레인 액세서리 (팔) 큐브","크레스트 드레인 액세서리 (목걸이) 큐브"],
-        legendary5: ["크레스트 드레인 액세서리 (하의) 큐브"],
-        legendary6: ["찬란한 비전의 원석","드랍률 70% 메달 큐브 (1일)"],
-        legendary7: ["무기 전용 강화의 부적 Lv.10","방어구 전용 강화의 부적 Lv.10","버서커","새크리파이스","글로리 오브 빅토리"],
-        legendary8: ["현자의 크리티컬 마법석","현자의 극대화 마법석","현자의 동작속도 마법석","현자의 추가 데미지 마법석","현자의 데미지 감소 마법석","현자의 HP 증가 마법석"],
-        legendary9: ["골드 샤이닝 머플러 큐브","디바인 아뮬렛 큐브","아케인 글리프"],
+        legendary1: ["베리타스 페르소나 무기 큐브","베리타스 페르소나 헤어 큐브"," 베리타스 페르소나 어나더 헤어 큐브"],
+        legendary2: ["베리타스 페르소나 상의 큐브","베리타스 페르소나 하의 큐브"],
+        legendary3: ["베리타스 페르소나 장갑 큐브","베리타스 페르소나 신발 큐브"],
+        legendary4: ["베리타스 페르소나 액세서리 (얼굴 하) 큐브"],
+        legendary5: ["베리타스 페르소나 액세서리 (하의) 큐브"],
+        legendary6: ["베리타스 페르소나 액세서리 (귀걸이) 큐브"],
+        legendary7: ["베리타스 페르소나 액세서리 (무기) 큐브"],
+        A_legendary1: ["찬란한 비전의 원석","드랍률 70% 메달 큐브 (1일)"],
+        A_legendary2: ["무기 전용 강화의 부적 Lv.10","방어구 전용 강화의 부적 Lv.10","버서커","새크리파이스","글로리 오브 빅토리"],
+        A_legendary3: ["현자의 크리티컬 마법석","현자의 극대화 마법석","현자의 동작속도 마법석","현자의 추가 데미지 마법석","현자의 데미지 감소 마법석","현자의 HP 증가 마법석"],
+        A_legendary4: ["골드 샤이닝 머플러 큐브","디바인 아뮬렛 큐브","아케인 글리프"],
+        
         legend1: ["현자의 마법석 2개 큐브"],
         legend2: ["환상적인 하이퍼 액티브 가속화 영약", "환상적인 벤투스의 날개깃 영약"],
         legend3: ["엘 수색대 컬렉션 - 시너지 효과 이용권 (10일)"],
@@ -180,12 +174,14 @@
         common2: ["엘의 조각 (불명)","엘의 조각 (레드)","엘의 조각 (블루)","엘의 조각 (윈드)","엘의 조각 (그린)","엘의 조각 (다크)","엘의 조각 (라이트)"]
       };
 
+      // 변수
       let items = [];
       let drawCount = 0;
       let gauge = 0;
       let itemMap = {};
       let fullCount = 0;
 
+      // 요소
       const itemList = document.getElementById('itemList');
       const drawBtn = document.getElementById('drawBtn');
       const drawInput = document.getElementById('drawInput');
@@ -193,169 +189,145 @@
       const gaugeBar = document.getElementById('gaugeBar');
       const gaugePercent = document.getElementById('gaugePercent');
       const fullCountText = document.getElementById('fullCountText');
-      const historyBtn = document.getElementById('historyBtn');
-      const historyModal = document.getElementById('historyModal');
-      const historyList = document.getElementById('historyList');
-      const closeHistoryBtn = document.getElementById('closeHistoryBtn');
-      const resetBtn = document.getElementById('resetBtn');
       const showAllBtn = document.getElementById('showAllBtn');
-        const modal = document.getElementById('modal');
-        const fullItemList = document.getElementById('fullItemList');
-        const closeModalBtn = document.getElementById('closeModalBtn');
+      const modal = document.getElementById('modal');
+      const fullItemList = document.getElementById('fullItemList');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const resetBtn = document.getElementById('resetBtn');
 
-        // 전체 목록 보기 버튼 이벤트
-    showAllBtn.addEventListener('click', () => {
-    fullItemList.innerHTML = ''; // 초기화
+      // 순서
+      const GRADE_ORDER = { legendary: 1, legend: 2, rare: 3, common: 4 };
 
-    const entries = Object.entries(itemMap);
-    if (entries.length === 0) {
-        fullItemList.innerHTML = '<p>아직 아무것도 뽑지 않았습니다.</p>';
-    } else {
-        entries.forEach(([name, data]) => {
-          const el = document.createElement('div');
-          el.className = `px-2 py-1 text-sm font-bold item-${data.type} item-box item-${data.type}-box`;
-          el.textContent = `${name} x ${data.count}`;
-          fullItemList.appendChild(el);
-        });
-    }
-
-    window.addEventListener('click', (e) => {
-      if (modal.style.display === 'block' && !modal.contains(e.target) && e.target !== showAllBtn) {
-        modal.style.display = 'none';
+      // 등급
+      function getBaseType(type) {
+        if (type.startsWith('legendary')) return 'legendary';
+        if (type.startsWith('legend')) return 'legend';
+        if (type.startsWith('rare')) return 'rare';
+        if (type.startsWith('common')) return 'common';
+        return 'common';
       }
-    });
-    
-    modal.style.display = 'block';
-    });
 
-    // 닫기 버튼
-    closeModalBtn.addEventListener('click', () => {
-    modal.style.display = 'none';
-    });
+      // 우선순위
+      function getGradePriority(type) {
+        return GRADE_ORDER[getBaseType(type)] || 5;
+      }
 
-    // 초기화 버튼
-    resetBtn.addEventListener('click', () => {
-    items.length = 0;
-    for (let key in itemMap) delete itemMap[key];
+      // 화면
+      function updateGaugeDisplay() {
+        if (gauge >= 100) {
+          fullCount += Math.floor(gauge / 100);
+          gauge = gauge % 100;
+        }
+        gaugeBar.style.width = `${Math.min(gauge, 100).toFixed(2)}%`;
+        gaugePercent.textContent = `${Math.min(gauge, 100).toFixed(2)}%`;
+        fullCountText.textContent = `정가 횟수 ${fullCount}번`;
+      }
 
-
-        
-    
-    function updateGaugeDisplay() {
-    if (gauge >= 100) {
-        fullCount += Math.floor(gauge / 100); // 100 넘는 만큼 추가
-        fullCount += reached;
-        gauge = gauge % 100; // 100 이상이면 나머지만 유지
-    }
-
-    gaugeBar.style.width = `${Math.min(gauge, 100).toFixed(2)}%`;
-    gaugePercent.textContent = `${Math.min(gauge, 100).toFixed(2)}%`;
-    fullCountText.textContent = `정가 횟수 ${fullCount}번`;
-    }
-
-
-    fullItemList.innerHTML = '<p>모든 항목이 초기화되었습니다.</p>';
-    });
-
-    function getRandomItem() {
+      // 무작위
+      function getRandomItem() {
         const r = Math.random();
         let sum = 0;
         for (const item of ITEM_POOL) {
-            sum += item.prob;
-            if (r < sum) {
+          sum += item.prob;
+          if (r < sum) {
             const variants = ITEM_VARIANTS[item.type];
             if (!variants || variants.length === 0) {
-                console.warn(`❗ Variants for "${item.type}" not found or empty`);
-                return { name: item.name, type: item.type, point: item.point };
+              return { name: item.name, type: item.type, point: item.point };
             }
             const name = variants[Math.floor(Math.random() * variants.length)];
-            if (!name) {
-                console.warn(`❗ Empty item name found in type "${item.type}"`);
-            }
             return { name, type: item.type, point: item.point };
-            }
+          }
         }
-        // fallback
         const fallback = ITEM_POOL[ITEM_POOL.length - 1];
         const fallbackName = ITEM_VARIANTS[fallback.type]?.[0] || "알 수 없음";
-        return {
-            name: fallbackName,
-            type: fallback.type,
-            point: fallback.point
-        };
+        return { name: fallbackName, type: fallback.type, point: fallback.point };
+      }
+
+      // 목록
+      showAllBtn.addEventListener('click', () => {
+        fullItemList.innerHTML = ''; 
+        const entries = Object.entries(itemMap);
+        if (entries.length === 0) {
+          fullItemList.innerHTML = '<p>아직 아무것도 뽑지 않았습니다.</p>';
+        } else {
+          // 정렬
+          entries.sort((a, b) => {
+            const prioA = getGradePriority(a[1].type);
+            const prioB = getGradePriority(b[1].type);
+            if (prioA !== prioB) return prioA - prioB;
+            return a[0].localeCompare(b[0]);
+          });
+
+          // 추가
+          entries.forEach(([name, data]) => {
+            const el = document.createElement('div');
+            el.className = `px-2 py-1 text-sm font-bold item-${data.type} item-box item-${getBaseType(data.type)}-box`;
+            el.textContent = `${name} x ${data.count}`;
+            fullItemList.appendChild(el);
+          });
         }
-
-
-      function updateGaugeDisplay() {
-        gaugeBar.style.width = `${gauge.toFixed(2)}%`;
-        gaugePercent.textContent = `${gauge.toFixed(2)}%`;
-        fullCountText.textContent = `정가 횟수 ${fullCount}번`;
-        }
-
-        drawBtn.addEventListener('click', () => {
-            const count = Math.min(Math.max(parseInt(drawInput.value) || 1, 1), 1000000);
-            itemList.innerHTML = '';
-            let lastItem = null;
-
-            for (let i = 0; i < count; i++) {
-                const item = getRandomItem();
-                items.push(item);
-                gauge += item.point;
-
-                if (itemMap[item.name]) {
-                itemMap[item.name].count++;
-                } else {
-                itemMap[item.name] = { count: 1, type: item.type };
-                }
-
-                if (gauge >= 100) {
-                const reached = Math.floor(gauge / 100);
-                fullCount += reached;
-                gauge = gauge % 100;
-                console.log(`${reached}회 정가 도달!`);
-                }
-
-                lastItem = item;
-            }
-
-            if (lastItem) {
-                const el = document.createElement('div');
-                el.className = `px-2 py-1 text-sm font-bold item-${lastItem.type} item-box item-${lastItem.type}-box`;
-                el.textContent = lastItem.name;
-                itemList.appendChild(el);
-            }
-
-            drawCount += count;
-            drawCountSpan.textContent = `${drawCount}개 뽑음`;
-            updateGaugeDisplay();
-            });
-
-
-
-      historyBtn.addEventListener('click', () => {
-        historyList.innerHTML = '';
-        for (const name in itemMap) {
-          const { count, type } = itemMap[name];
-          const el = document.createElement('div');
-          el.className = `px-2 py-1 text-sm font-bold item-${type} item-box item-${type}-box`;
-          el.textContent = `${name} x ${count}`;
-          historyList.appendChild(el);
-        }
-        historyModal.classList.remove('hidden');
-        resetBtn.classList.remove('hidden');
+        modal.style.display = 'block';
       });
 
-      closeHistoryBtn.addEventListener('click', () => {
-        historyModal.classList.add('hidden');
+      // 닫기
+      window.addEventListener('click', (e) => {
+        if (modal.style.display === 'block' && !modal.contains(e.target) && e.target !== showAllBtn) {
+          modal.style.display = 'none';
+        }
+      });
+      closeModalBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
       });
 
+      // 초기화
       resetBtn.addEventListener('click', () => {
-        itemMap = {};
         items = [];
+        itemMap = {};
+        drawCount = 0;
+        gauge = 0;
+        fullCount = 0;
         itemList.innerHTML = '';
-        historyList.innerHTML = '';
-        historyModal.classList.add('hidden');
-        resetBtn.classList.add('hidden');
+        drawCountSpan.textContent = '0개 뽑음';
+        fullItemList.innerHTML = '<p>모든 항목이 초기화되었습니다.</p>';
+        updateGaugeDisplay();
+      });
+
+      // 뽑기
+      drawBtn.addEventListener('click', () => {
+        // 1만개
+        const count = Math.min(Math.max(parseInt(drawInput.value) || 1, 1), 10000);
+        itemList.innerHTML = '';
+        let lastItem = null;
+
+        for (let i = 0; i < count; i++) {
+          const item = getRandomItem();
+          items.push(item);
+          gauge += item.point;
+
+          if (itemMap[item.name]) {
+            itemMap[item.name].count++;
+          } else {
+            itemMap[item.name] = { count: 1, type: item.type };
+          }
+
+          if (gauge >= 100) {
+            const reached = Math.floor(gauge / 100);
+            fullCount += reached;
+            gauge = gauge % 100;
+          }
+          lastItem = item;
+        }
+
+        if (lastItem) {
+          const el = document.createElement('div');
+          el.className = `px-2 py-1 text-sm font-bold item-${lastItem.type} item-box item-${getBaseType(lastItem.type)}-box`;
+          el.textContent = lastItem.name;
+          itemList.appendChild(el);
+        }
+
+        drawCount += count;
+        drawCountSpan.textContent = `${drawCount}개 뽑음`;
+        updateGaugeDisplay();
       });
     </script>
   </body>
