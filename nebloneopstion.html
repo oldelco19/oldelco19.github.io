@@ -191,10 +191,9 @@
 
         // targetConfig: { [optionName]: minValue(number) }  -- 이 값 이상이어야 통과
         let targetConfig = {
-            "방어구 강화 수치 1당 물리/마법 공격력": 0.1,
-            "방어구 강화 수치 1당 크리티컬 데미지": 0.1,
-            "방어구 강화 수치 1당 모든 스킬 데미지": 0.1,
-            "체력 100% 이하인 적 공격 시 데미지": 0.1
+            "방어구 강화 수치 1당 물리/마법 공격력": 0.02,
+            "방어구 강화 수치 1당 크리티컬 데미지": 0.02,
+            "방어구 강화 수치 1당 모든 스킬 데미지": 0.02,
         };
 
         function buildOptionLine(group, value) {
@@ -203,21 +202,27 @@
             return `${group.name} +${value}%`;
         }
 
-        function weightedPick4(groups) {
+        function weightedPick3(groups) {
             let pool = groups.slice();
             let picked = [];
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 3; i++) {
                 let total = pool.reduce((sum, g) => sum + g.weight, 0);
                 let r = Math.random() * total;
                 let acc = 0;
+                let chosenIndex = -1;
                 for (let j = 0; j < pool.length; j++) {
                     acc += pool[j].weight;
                     if (r <= acc) {
-                        picked.push(pool[j]);
-                        pool.splice(j, 1);
+                        chosenIndex = j;
                         break;
                     }
                 }
+                // 부동소수점 오차로 인해 못 골랐을 경우 마지막 항목을 선택 (안전장치)
+                if (chosenIndex === -1) {
+                    chosenIndex = pool.length - 1;
+                }
+                picked.push(pool[chosenIndex]);
+                pool.splice(chosenIndex, 1);
             }
             return picked;
         }
@@ -238,7 +243,7 @@
         }
 
         function getRandomOptions() {
-            let picked = weightedPick4(options);
+            let picked = weightedPick3(options);
             let values = picked.map(g => g.values[Math.floor(Math.random() * g.values.length)]);
             renderOptions(picked, values);
 
@@ -257,18 +262,18 @@
                 alert("먼저 설정 버튼에서 목표 옵션을 선택해주세요.");
                 return;
             }
-            if (targetNames.length < 4) {
-                alert("목표 옵션은 최소 4개 이상 선택해야 4개 슬롯을 채울 수 있습니다.");
+            if (targetNames.length < 3) {
+                alert("목표 옵션은 최소 3개 이상 선택해야 3개 슬롯을 채울 수 있습니다.");
                 return;
             }
 
             searchCount = 0;
-            const maxTries = 10000000;
+            const maxTries = 5000000;
 
             while (searchCount < maxTries) {
                 searchCount++;
 
-                let picked = weightedPick4(options);
+                let picked = weightedPick3(options);
                 let values = picked.map(g => g.values[Math.floor(Math.random() * g.values.length)]);
 
                 let allFound = picked.every((g, idx) => {
@@ -362,11 +367,10 @@
         <div class="top-bar">
             <button class="reset-button" onclick="resetClickCount()">횟수 리셋</button>
         </div>
-        <div class="item-header">+13 네블론 슈트 무떵이</div>
+        <div class="item-header">+13 네블론슈트 무떵이</div>
         <img src="https://elwiki.net/wiki/images/thumb/a/a3/HedgehogLu-Ciel.png/275px-HedgehogLu-Ciel.png"
      class="item-image" alt="아이템 이미지">
         <div id="result">
-            <div class="option-slot">적용 중인 옵션이 없습니다.</div>
             <div class="option-slot">적용 중인 옵션이 없습니다.</div>
             <div class="option-slot">적용 중인 옵션이 없습니다.</div>
             <div class="option-slot">적용 중인 옵션이 없습니다.</div>
