@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>옵션 변환 시뮬</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #1e1e1e;
+            color: white;
+        }
+        .item-box {
+            width: 380px;
+            margin: 50px auto;
+            background: #222;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        .item-header {
+            background: black;
+            color: cyan;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+        }
+        .item-image {
+            width: 60px;
+            height: 60px;
+            margin: 10px auto;
+            display: block;
+            border-radius: 8px;
+            border: 2px solid #ccc;
+        }
+        .option-slot {
+            background: white;
+            color: black;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+        .highlight {
+            color: red;
+            font-weight: bold;
+        }
+        .button {
+            background: cyan;
+            color: black;
+            font-weight: bold;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-left: 4px;
+            margin-right: 4px;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background: lightblue;
+        }
+        .button.secondary {
+            background: #555;
+            color: white;
+        }
+        .button.secondary:hover {
+            background: #777;
+        }
+        .count-display, .search-count, .ed-display {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .count-display { color: yellow; }
+        .search-count { color: lightblue; font-size: 1.1em; }
+        .ed-display { color: #7CFC00; font-size: 1.2em; }
+
+        /* 모달 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal-box {
+            background: #2a2a2a;
+            width: 340px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: left;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .modal-box h3 {
+            margin-top: 0;
+            color: cyan;
+            text-align: center;
+        }
+        .target-row {
+            display: flex;
+            align-items: center;
+            background: #3a3a3a;
+            border-radius: 5px;
+            padding: 6px 8px;
+            margin-bottom: 6px;
+            gap: 6px;
+        }
+        .target-row label {
+            flex: 1;
+            font-size: 0.85em;
+            cursor: pointer;
+        }
+        .target-row input[type="number"],
+        .target-row select {
+            width: 70px;
+            padding: 3px;
+            border-radius: 4px;
+            border: none;
+        }
+        .target-row .pct-unit {
+            font-size: 0.8em;
+            color: #ccc;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 4px;
+        }
+        .reset-button {
+            background: #444;
+            color: #ffcccc;
+            font-size: 0.8em;
+            padding: 4px 8px;
+            border: 1px solid #ff6666;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .reset-button:hover {
+            background: #ff6666;
+            color: white;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        let clickCount = 0;
+        let searchCount = 0;
+
+        // 시행당 비용 (현금 기준)
+        const COST_PER_TRY_WON = 900;
+
+        function makeValues(start, end, step, decimals) {
+            let arr = [];
+            for (let v = start; v <= end + 1e-9; v += step) {
+                arr.push(parseFloat(v.toFixed(decimals)));
+            }
+            return arr;
+        }
+
+        const options = [
+            { name: "방어구 강화 수치 1당 물리/마법 공격력", weight: 0.833, values: makeValues(0.02, 0.20, 0.02, 2) },
+            { name: "방어구 강화 수치 1당 크리티컬 데미지", weight: 0.833, values: makeValues(0.02, 0.20, 0.02, 2) },
+            { name: "방어구 강화 수치 1당 모든 스킬 데미지", weight: 0.834, values: makeValues(0.02, 0.20, 0.02, 2) },
+            { name: "공격시 입힌 피해량의 n%만큼 3초간 추가 지속 피해", weight: 6.5, values: makeValues(0.1, 1.0, 0.1, 1), template: v => `공격시 입힌 피해량의 ${v}%만큼 3초간 추가 지속 피해` },
+            { name: "물리/마법 공격력", weight: 6.5, values: makeValues(0.1, 1.0, 0.1, 1) },
+            { name: "체력 100% 이하인 적 공격 시 데미지", weight: 6.5, values: makeValues(0.1, 1.0, 0.1, 1) },
+            { name: "양극화 : 타격/피격 데미지", weight: 6.5, values: makeValues(0.1, 1.0, 0.1, 1), cap: "최대 60%" },
+            { name: "크리티컬 데미지", weight: 6.5, values: makeValues(0.1, 1.0, 0.1, 1) },
+            { name: "보스에게 주는 피해 증가", weight: 6.5, values: makeValues(0.1, 1.0, 0.1, 1), template: v => `보스에게 주는 피해 +${v}%` },
+            { name: "강인한 스킬 데미지 증가", weight: 6.5, values: makeValues(0.1, 1.0, 0.1, 1), template: v => `강인한 스킬 데미지 +${v}%` },
+            { name: "강렬한 스킬 데미지 증가", weight: 6.5, values: makeValues(0.1, 1.0, 0.1, 1), template: v => `강렬한 스킬 데미지 +${v}%` },
+            { name: "초월한 스킬 데미지 증가", weight: 6.5, values: makeValues(0.1, 1.0, 0.1, 1), template: v => `초월한 스킬 데미지 +${v}%` },
+            { name: "모든 스킬 데미지 증가", weight: 6.5, values: makeValues(0.1, 1.0, 0.1, 1), template: v => `모든 스킬 데미지 +${v}%` },
+            { name: "크리티컬", weight: 6.5, values: makeValues(0.3, 1.2, 0.1, 1) },
+            { name: "극대화", weight: 6.5, values: makeValues(0.3, 1.2, 0.1, 1) },
+            { name: "적 물리/마법 방어력 무시", weight: 6.5, values: makeValues(0.1, 1.0, 0.1, 1), cap: "최대 20%", template: v => `적 물리/마법 방어력 무시 ${v}% (최대 20%)` },
+            { name: "일반 몬스터에게 주는 피해 증가", weight: 6.5, values: makeValues(0.3, 1.2, 0.1, 1) },
+            { name: "지원 포지션이 스킬로 아군에게 주는 회복 버프 증폭", weight: 6.5, values: makeValues(0.3, 1.2, 0.1, 1), template: v => `지원 포지션이 스킬로 파티원에게 주는 공용 HP/MP 회복 버프 증폭 +${v}%` }
+        ];
+
+        // targetConfig: { [optionName]: minValue(number) }  -- 이 값 이상이어야 통과
+        let targetConfig = {
+            "방어구 강화 수치 1당 물리/마법 공격력": 0.1,
+            "방어구 강화 수치 1당 크리티컬 데미지": 0.1,
+            "방어구 강화 수치 1당 모든 스킬 데미지": 0.1,
+            "체력 100% 이하인 적 공격 시 데미지": 0.1
+        };
+
+        function buildOptionLine(group, value) {
+            if (group.template) return group.template(value);
+            if (group.cap) return `${group.name} +${value}% (${group.cap.replace("최대 ", "")})`;
+            return `${group.name} +${value}%`;
+        }
+
+        function weightedPick4(groups) {
+            let pool = groups.slice();
+            let picked = [];
+            for (let i = 0; i < 4; i++) {
+                let total = pool.reduce((sum, g) => sum + g.weight, 0);
+                let r = Math.random() * total;
+                let acc = 0;
+                for (let j = 0; j < pool.length; j++) {
+                    acc += pool[j].weight;
+                    if (r <= acc) {
+                        picked.push(pool[j]);
+                        pool.splice(j, 1);
+                        break;
+                    }
+                }
+            }
+            return picked;
+        }
+
+        function renderOptions(picked, valuesForPicked) {
+            let resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+            picked.forEach((group, i) => {
+                let value = valuesForPicked[i];
+                let p = document.createElement('div');
+                p.className = "option-slot";
+                if (value === group.values[group.values.length - 1]) {
+                    p.classList.add("highlight");
+                }
+                p.textContent = buildOptionLine(group, value);
+                resultDiv.appendChild(p);
+            });
+        }
+
+        function getRandomOptions() {
+            let picked = weightedPick4(options);
+            let values = picked.map(g => g.values[Math.floor(Math.random() * g.values.length)]);
+            renderOptions(picked, values);
+
+            clickCount++;
+            document.getElementById('click-count').textContent = `옵션 변환 횟수: ${clickCount}회`;
+        }
+
+        function resetClickCount() {
+            clickCount = 0;
+            document.getElementById('click-count').textContent = `옵션 변환 횟수: ${clickCount}회`;
+        }
+
+        function findTargetOptions() {
+            const targetNames = Object.keys(targetConfig);
+            if (targetNames.length === 0) {
+                alert("먼저 설정 버튼에서 목표 옵션을 선택해주세요.");
+                return;
+            }
+            if (targetNames.length < 4) {
+                alert("목표 옵션은 최소 4개 이상 선택해야 4개 슬롯을 채울 수 있습니다.");
+                return;
+            }
+
+            searchCount = 0;
+            const maxTries = 10000000;
+
+            while (searchCount < maxTries) {
+                searchCount++;
+
+                let picked = weightedPick4(options);
+                let values = picked.map(g => g.values[Math.floor(Math.random() * g.values.length)]);
+
+                let allFound = picked.every((g, idx) => {
+                    if (!Object.prototype.hasOwnProperty.call(targetConfig, g.name)) return false;
+                    return values[idx] >= targetConfig[g.name];
+                });
+
+                if (allFound) {
+                    renderOptions(picked, values);
+
+                    document.getElementById('search-count').textContent = `목표 옵션을 찾기 위해 실행된 횟수: ${searchCount.toLocaleString()}회`;
+
+                    let cashCost = searchCount * COST_PER_TRY_WON;
+                    document.getElementById('ed-cost').textContent = `예상 필요 금액: ${cashCost.toLocaleString()}원`;
+                    return;
+                }
+            }
+            document.getElementById('search-count').textContent = `${maxTries.toLocaleString()}회 시도 내에 찾지 못했습니다 (목표 조건의 확률이 너무 낮을 수 있습니다).`;
+            document.getElementById('ed-cost').textContent = '';
+        }
+
+        // ---- 설정 모달 ----
+        function openSettings() {
+            let box = document.getElementById('settings-list');
+            box.innerHTML = '';
+
+            options.forEach(g => {
+                let row = document.createElement('div');
+                row.className = 'target-row';
+
+                let checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = 'chk-' + g.name;
+                checkbox.checked = Object.prototype.hasOwnProperty.call(targetConfig, g.name);
+
+                let label = document.createElement('label');
+                label.setAttribute('for', checkbox.id);
+                label.textContent = `${g.name} (등장확률 ${g.weight}%)`;
+
+                let selectInput = document.createElement('select');
+                selectInput.id = 'min-' + g.name;
+                g.values.forEach(v => {
+                    let opt = document.createElement('option');
+                    opt.value = v;
+                    opt.textContent = v + '%';
+                    selectInput.appendChild(opt);
+                });
+                let currentVal = targetConfig[g.name] !== undefined ? targetConfig[g.name] : g.values[0];
+                // 값이 목록에 없으면 가장 가까운 값으로 보정
+                if (!g.values.includes(currentVal)) {
+                    currentVal = g.values.reduce((a, b) => Math.abs(b - currentVal) < Math.abs(a - currentVal) ? b : a, g.values[0]);
+                }
+                selectInput.value = currentVal;
+
+                let unit = document.createElement('span');
+                unit.className = 'pct-unit';
+                unit.textContent = '이상';
+
+                row.appendChild(checkbox);
+                row.appendChild(label);
+                row.appendChild(selectInput);
+                row.appendChild(unit);
+                box.appendChild(row);
+            });
+
+            document.getElementById('settings-overlay').classList.add('open');
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-overlay').classList.remove('open');
+        }
+
+        function saveSettings() {
+            let newConfig = {};
+            options.forEach(g => {
+                let checkbox = document.getElementById('chk-' + g.name);
+                if (checkbox && checkbox.checked) {
+                    let numInput = document.getElementById('min-' + g.name);
+                    let val = parseFloat(numInput.value);
+                    if (isNaN(val)) val = g.values[0];
+                    newConfig[g.name] = val;
+                }
+            });
+            targetConfig = newConfig;
+            closeSettings();
+        }
+    </script>
+</head>
+<body>
+    <div class="item-box">
+        <div class="top-bar">
+            <button class="reset-button" onclick="resetClickCount()">횟수 리셋</button>
+        </div>
+        <div class="item-header">+13 네블론 슈트 무떵이</div>
+        <img src="https://elwiki.net/wiki/images/thumb/a/a3/HedgehogLu-Ciel.png/275px-HedgehogLu-Ciel.png"
+     class="item-image" alt="아이템 이미지">
+        <div id="result">
+            <div class="option-slot">적용 중인 옵션이 없습니다.</div>
+            <div class="option-slot">적용 중인 옵션이 없습니다.</div>
+            <div class="option-slot">적용 중인 옵션이 없습니다.</div>
+            <div class="option-slot">적용 중인 옵션이 없습니다.</div>
+        </div>
+        <div>
+            <button class="button" onclick="getRandomOptions()">옵션 변환</button>
+        </div>
+        <div id="click-count" class="count-display">옵션 변환 횟수: 0회</div>
+
+        <div>
+            <button class="button" onclick="findTargetOptions()">종결옵</button>
+            <button class="button secondary" onclick="openSettings()">설정</button>
+        </div>
+        <div id="search-count" class="search-count"></div>
+        <div id="ed-cost" class="ed-display"></div>
+    </div>
+
+    <div class="modal-overlay" id="settings-overlay">
+        <div class="modal-box">
+            <h3>종결옵 목표 설정</h3>
+            <div id="settings-list"></div>
+            <div class="modal-actions">
+                <button class="button" onclick="saveSettings()">저장</button>
+                <button class="button secondary" onclick="closeSettings()">취소</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
