@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>네블론 슈트 옵션 변환 점수 계산기</title>
+<style>
+  body { font-family: sans-serif; max-width: 650px; margin: 30px auto; padding: 20px; background: #f4f6f9; }
+  .calculator { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+  h2 { text-align: center; color: #333; margin-top: 0; }
+  .slot-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; }
+  .slot-label { width: 60px; }
+  select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; flex: 1; font-size: 14px; }
+  button { width: 100%; padding: 14px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 15px; }
+  button:hover { background: #0056b3; }
+  .result-box { margin-top: 25px; padding: 15px; background: #e9ecef; border-radius: 5px; text-align: center; font-size: 22px; color: #28a745; }
+</style>
+</head>
+<body>
+
+<div class="calculator">
+  <h2>네블론 슈트 옵션 변환 계산기</h2>
+  <div id="slots-container"></div>
+  <button onclick="calculateScore()">점수 계산하기</button>
+  <div class="result-box" id="result">점수: 0.00 / 100점</div>
+</div>
+
+<script>
+// 옵션 데이터
+const optionData = {
+  "none": { name: "선택 안함", max: 0, weight: 0, values: [] },
+  "stat_atk": { name: "강수 물/마법 공격력%", max: 0.2, weight: 1.5, values: [0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20] },
+  "stat_msd": { name: "강수 모든 스킬 데미지%", max: 0.2, weight: 1.5, values: [0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20] },
+  "stat_crd": { name: "강수 크리티컬 데미지%", max: 0.2, weight: 1.5, values: [0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20] },
+  "100_atk": { name: "체력 100% 이하인 적 공격 시 데미지", max: 1.2, weight: 1.2, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
+  "c_p": { name: "공격시 입힌 피해량의 n%만큼 3초간 추가 지속 피해", max: 1.0, weight: 1.0, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
+  "t_p": { name: "양극화 : 타격/피격 데미지", max: 1.0, weight: 1.0, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
+  "mmd": { name: "물리/마법 공격력", max: 1.0, weight: 0.8, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
+  "msd": { name: "모든 스킬 데미지 증가", max: 1.0, weight: 0.6, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
+  "crd": { name: "크리티컬 데미지", max: 1.0, weight: 0.6, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2] },
+  "bsd": { name: "강렬/초월한 스킬 데미지 증가", max: 1.0, weight: 0.4, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
+  "bsp": { name: "보스에게 주는 피해 증가", max: 1.0, weight: 0.2, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] }
+
+};
+
+// UI 생성
+const container = document.getElementById("slots-container");
+for (let i = 1; i <= 3; i++) {
+  const row = document.createElement("div");
+  row.className = "slot-row";
+  
+  let optSelectHtml = `<select id="opt-${i}" onchange="handleSelectChange(${i})">`;
+  for (const key in optionData) {
+    optSelectHtml += `<option value="${key}">${optionData[key].name}</option>`;
+  }
+  optSelectHtml += `</select>`;
+  
+  let valSelectHtml = `<select id="val-${i}"><option value="0">수치 선택</option></select>`;
+  
+  row.innerHTML = `
+    <span class="slot-label">슬롯 ${i}</span>
+    ${optSelectHtml}
+    ${valSelectHtml}
+  `;
+  container.appendChild(row);
+}
+
+// 수치 변경
+function handleSelectChange(idx) {
+  const key = document.getElementById(`opt-${idx}`).value;
+  const valSelect = document.getElementById(`val-${idx}`);
+  valSelect.innerHTML = "";
+  
+  if (key === "none" || !optionData[key]) {
+    valSelect.innerHTML = `<option value="0">수치 선택</option>`;
+    return;
+  }
+  
+  const values = optionData[key].values;
+  values.forEach(v => {
+    const opt = document.createElement("option");
+    opt.value = v;
+    opt.textContent = `${v}%`;
+    valSelect.appendChild(opt);
+  });
+}
+
+// 점수 계산
+function calculateScore() {
+  let userScore = 0;
+  
+  // 최고점 기준값
+  const maxPossibleScore = Object.values(optionData)
+    .map(item => item.weight)
+    .sort((a, b) => b - a)
+    .slice(0, 3)
+    .reduce((acc, cur) => acc + cur, 0);
+
+  for (let i = 1; i <= 3; i++) {
+    const key = document.getElementById(`opt-${i}`).value;
+    const val = parseFloat(document.getElementById(`val-${i}`).value) || 0;
+    
+    if (key !== "none" && optionData[key]) {
+      const item = optionData[key];
+      const ratio = Math.min(val / item.max, 1.0);
+      userScore += ratio * item.weight;
+    }
+  }
+
+  // 100점 제한
+  let finalScore = maxPossibleScore > 0 ? (userScore / maxPossibleScore) * 100 : 0;
+  finalScore = Math.min(finalScore, 100.0);
+
+  document.getElementById("result").innerText = `점수: ${finalScore.toFixed(2)} / 100점`;
+}
+</script>
+
+</body>
+</html>
