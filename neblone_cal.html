@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>네블론 슈트 옵션 변환 점수 계산기</title>
 <style>
   body { font-family: sans-serif; max-width: 650px; margin: 30px auto; padding: 20px; background: #f4f6f9; }
@@ -14,31 +15,46 @@
   button:hover { background: #0056b3; }
   .result-box { margin-top: 25px; padding: 15px; background: #e9ecef; border-radius: 5px; text-align: center; font-size: 22px; color: #28a745; }
   .changelog-board {
-      width: 380px;
-      margin: 0 auto 50px;
-      background: #222;
+      position: fixed;
+      top: 30px;
+      right: 30px;
+      width: 300px;
+      background: white;
+      color: #333;
       padding: 15px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
       text-align: left;
       box-sizing: border-box;
   }
   .changelog-board h3 {
       margin: 0 0 10px;
-      color: cyan;
+      color: #333;
       text-align: center;
   }
   .changelog-row {
-      background: #3a3a3a;
+      background: #f4f6f9;
       border-radius: 5px;
       padding: 6px 8px;
       margin-bottom: 6px;
       font-size: 0.85em;
   }
   .changelog-row .date {
-      color: yellow;
+      color: #007bff;
       font-weight: bold;
-      margin-right: 6px;
+      display: block;
+      margin-bottom: 4px;
+  }
+  .changelog-row ul {
+      margin: 0;
+      padding-left: 18px;
+  }
+  @media (max-width: 1000px) {
+      .changelog-board {
+          position: static;
+          width: auto;
+          margin-top: 20px;
+      }
   }
 </style>
 </head>
@@ -50,9 +66,10 @@
   <button onclick="calculateScore()">점수 계산하기</button>
   <div class="result-box" id="result">점수: 0.00 / 100점</div>
 </div>
-  <div class="changelog-board">
-    <h3>수정내역</h3>
-    <div id="changelog-list"></div>
+
+<div class="changelog-board">
+  <h3>수정내역</h3>
+  <div id="changelog-list"></div>
 </div>
 
 <script>
@@ -70,7 +87,6 @@ const optionData = {
   "crd": { name: "크리티컬 데미지", max: 1.0, weight: 0.68, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
   "bsd": { name: "강렬/초월한 스킬 데미지 증가", max: 1.0, weight: 0.4, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
   "bsp": { name: "보스에게 주는 피해 증가", max: 1.0, weight: 0.2, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] }
-
 };
 
 // UI 생성
@@ -78,15 +94,15 @@ const container = document.getElementById("slots-container");
 for (let i = 1; i <= 3; i++) {
   const row = document.createElement("div");
   row.className = "slot-row";
-  
+
   let optSelectHtml = `<select id="opt-${i}" onchange="handleSelectChange(${i})">`;
   for (const key in optionData) {
     optSelectHtml += `<option value="${key}">${optionData[key].name}</option>`;
   }
   optSelectHtml += `</select>`;
-  
+
   let valSelectHtml = `<select id="val-${i}"><option value="0">수치 선택</option></select>`;
-  
+
   row.innerHTML = `
     <span class="slot-label">슬롯 ${i}</span>
     ${optSelectHtml}
@@ -100,12 +116,12 @@ function handleSelectChange(idx) {
   const key = document.getElementById(`opt-${idx}`).value;
   const valSelect = document.getElementById(`val-${idx}`);
   valSelect.innerHTML = "";
-  
+
   if (key === "none" || !optionData[key]) {
     valSelect.innerHTML = `<option value="0">수치 선택</option>`;
     return;
   }
-  
+
   const values = optionData[key].values;
   values.forEach(v => {
     const opt = document.createElement("option");
@@ -118,7 +134,7 @@ function handleSelectChange(idx) {
 // 점수 계산
 function calculateScore() {
   let userScore = 0;
-  
+
   // 최고점 기준값
   const maxPossibleScore = Object.values(optionData)
     .map(item => item.weight)
@@ -129,7 +145,7 @@ function calculateScore() {
   for (let i = 1; i <= 3; i++) {
     const key = document.getElementById(`opt-${i}`).value;
     const val = parseFloat(document.getElementById(`val-${i}`).value) || 0;
-    
+
     if (key !== "none" && optionData[key]) {
       const item = optionData[key];
       const ratio = Math.min(val / item.max, 1.0);
@@ -143,24 +159,35 @@ function calculateScore() {
 
   document.getElementById("result").innerText = `점수: ${finalScore.toFixed(2)} / 100점`;
 }
-  const changelog = [
-    { date: "10/16", text: "강수와 일반 효과의 가중치가 다르던 문제가 수정됩니다." },
-    { date: "10/16", text: "강수가 아닌 크뎀, 모스뎀, 물마공 옵션의 점수가 미약하게 상승합니다." }
+
+// ---- 수정내역 게시판 ----
+// 새 날짜는 배열 맨 위에 추가: { date: "MM/DD", texts: ["내용1", "내용2"] },
+const changelog = [
+  { date: "10/16", texts: [
+      "강수와 일반 효과의 가중치가 다르던 문제가 수정됩니다.",
+      "강수가 아닌 크뎀, 모스뎀, 물마공 옵션의 점수가 미약하게 상승합니다."
+  ] }
 ];
 
 function renderChangelog() {
-    let box = document.getElementById('changelog-list');
-    box.innerHTML = '';
-    changelog.forEach(c => {
-        let row = document.createElement('div');
-        row.className = 'changelog-row';
-        let date = document.createElement('span');
-        date.className = 'date';
-        date.textContent = c.date;
-        row.appendChild(date);
-        row.appendChild(document.createTextNode(c.text));
-        box.appendChild(row);
+  let box = document.getElementById('changelog-list');
+  box.innerHTML = '';
+  changelog.forEach(c => {
+    let row = document.createElement('div');
+    row.className = 'changelog-row';
+    let date = document.createElement('span');
+    date.className = 'date';
+    date.textContent = c.date;
+    row.appendChild(date);
+    let ul = document.createElement('ul');
+    c.texts.forEach(t => {
+      let li = document.createElement('li');
+      li.textContent = t;
+      ul.appendChild(li);
     });
+    row.appendChild(ul);
+    box.appendChild(row);
+  });
 }
 
 document.addEventListener('DOMContentLoaded', renderChangelog);
