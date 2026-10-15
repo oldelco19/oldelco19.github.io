@@ -13,6 +13,33 @@
   button { width: 100%; padding: 14px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 15px; }
   button:hover { background: #0056b3; }
   .result-box { margin-top: 25px; padding: 15px; background: #e9ecef; border-radius: 5px; text-align: center; font-size: 22px; color: #28a745; }
+  .changelog-board {
+      width: 380px;
+      margin: 0 auto 50px;
+      background: #222;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      text-align: left;
+      box-sizing: border-box;
+  }
+  .changelog-board h3 {
+      margin: 0 0 10px;
+      color: cyan;
+      text-align: center;
+  }
+  .changelog-row {
+      background: #3a3a3a;
+      border-radius: 5px;
+      padding: 6px 8px;
+      margin-bottom: 6px;
+      font-size: 0.85em;
+  }
+  .changelog-row .date {
+      color: yellow;
+      font-weight: bold;
+      margin-right: 6px;
+  }
 </style>
 </head>
 <body>
@@ -22,6 +49,10 @@
   <div id="slots-container"></div>
   <button onclick="calculateScore()">점수 계산하기</button>
   <div class="result-box" id="result">점수: 0.00 / 100점</div>
+</div>
+  <div class="changelog-board">
+    <h3>수정내역</h3>
+    <div id="changelog-list"></div>
 </div>
 
 <script>
@@ -34,9 +65,9 @@ const optionData = {
   "100_atk": { name: "체력 100% 이하인 적 공격 시 데미지", max: 1.0, weight: 1.2, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
   "c_p": { name: "공격시 입힌 피해량의 n%만큼 3초간 추가 지속 피해", max: 1.0, weight: 1.0, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
   "t_p": { name: "양극화 : 타격/피격 데미지", max: 1.0, weight: 1.0, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
-  "mmd": { name: "물리/마법 공격력", max: 1.0, weight: 0.8, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
-  "msd": { name: "모든 스킬 데미지 증가", max: 1.0, weight: 0.6, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
-  "crd": { name: "크리티컬 데미지", max: 1.0, weight: 0.6, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
+  "mmd": { name: "물리/마법 공격력", max: 1.0, weight: 0.82, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
+  "msd": { name: "모든 스킬 데미지 증가", max: 1.0, weight: 0.68, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
+  "crd": { name: "크리티컬 데미지", max: 1.0, weight: 0.68, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
   "bsd": { name: "강렬/초월한 스킬 데미지 증가", max: 1.0, weight: 0.4, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] },
   "bsp": { name: "보스에게 주는 피해 증가", max: 1.0, weight: 0.2, values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] }
 
@@ -112,6 +143,27 @@ function calculateScore() {
 
   document.getElementById("result").innerText = `점수: ${finalScore.toFixed(2)} / 100점`;
 }
+  const changelog = [
+    { date: "10/16", text: "강수와 일반 효과의 가중치가 다르던 문제가 수정됩니다." },
+    { date: "10/16", text: "강수가 아닌 크뎀, 모스뎀, 물마공 옵션의 점수가 미약하게 상승합니다." }
+];
+
+function renderChangelog() {
+    let box = document.getElementById('changelog-list');
+    box.innerHTML = '';
+    changelog.forEach(c => {
+        let row = document.createElement('div');
+        row.className = 'changelog-row';
+        let date = document.createElement('span');
+        date.className = 'date';
+        date.textContent = c.date;
+        row.appendChild(date);
+        row.appendChild(document.createTextNode(c.text));
+        box.appendChild(row);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', renderChangelog);
 </script>
 
 </body>
