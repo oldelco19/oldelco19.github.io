@@ -387,27 +387,6 @@
             targetConfig = newConfig;
             closeSettings();
         }
-        const changelog = [
-            { date: "10/16", text: "강수와 일반 효과의 가중치가 다르던 문제가 수정됩니다.
-                강수가 아닌 크뎀, 모스뎀, 물마공의 옵션의 점수가 미약하게 상승합니다." }
-        ];
-        
-        function renderChangelog() {
-            let box = document.getElementById('changelog-list');
-            box.innerHTML = '';
-            changelog.forEach(c => {
-                let row = document.createElement('div');
-                row.className = 'changelog-row';
-                let date = document.createElement('span');
-                date.className = 'date';
-                date.textContent = c.date;
-                row.appendChild(date);
-                row.appendChild(document.createTextNode(c.text));
-                box.appendChild(row);
-            });
-        }
-        
-        renderChangelog();
     </script>
 </head>
 <body>
