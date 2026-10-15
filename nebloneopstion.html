@@ -152,6 +152,33 @@
             justify-content: center;
             margin-top: 10px;
         }
+        .changelog-board {
+            width: 380px;
+            margin: 0 auto 50px;
+            background: #222;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            text-align: left;
+            box-sizing: border-box;
+        }
+        .changelog-board h3 {
+            margin: 0 0 10px;
+            color: cyan;
+            text-align: center;
+        }
+        .changelog-row {
+            background: #3a3a3a;
+            border-radius: 5px;
+            padding: 6px 8px;
+            margin-bottom: 6px;
+            font-size: 0.85em;
+        }
+        .changelog-row .date {
+            color: yellow;
+            font-weight: bold;
+            margin-right: 6px;
+        }
     </style>
     <script>
         let clickCount = 0;
@@ -360,12 +387,37 @@
             targetConfig = newConfig;
             closeSettings();
         }
+        const changelog = [
+            { date: "10/16", text: "강수와 일반 효과의 가중치가 다르던 문제가 수정됩니다.
+                강수가 아닌 크뎀, 모스뎀, 물마공의 옵션의 점수가 미약하게 상승합니다." }
+        ];
+        
+        function renderChangelog() {
+            let box = document.getElementById('changelog-list');
+            box.innerHTML = '';
+            changelog.forEach(c => {
+                let row = document.createElement('div');
+                row.className = 'changelog-row';
+                let date = document.createElement('span');
+                date.className = 'date';
+                date.textContent = c.date;
+                row.appendChild(date);
+                row.appendChild(document.createTextNode(c.text));
+                box.appendChild(row);
+            });
+        }
+        
+        renderChangelog();
     </script>
 </head>
 <body>
     <div class="item-box">
         <div class="top-bar">
             <button class="reset-button" onclick="resetClickCount()">횟수 리셋</button>
+        </div>
+        <div class="changelog-board">
+            <h3>수정내역</h3>
+            <div id="changelog-list"></div>
         </div>
         <div class="item-header">+13 네블론슈트 무떵이</div>
         <img src="https://elwiki.net/wiki/images/thumb/a/a3/HedgehogLu-Ciel.png/275px-HedgehogLu-Ciel.png"
